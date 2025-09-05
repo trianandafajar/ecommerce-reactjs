@@ -10,3 +10,7 @@ export const createProduct = (data: Omit<Product, "id" | "created_at">): Product
     updated_at: new Date().toISOString(),
   };
 };
+
+export const shortCodeFromUUID = (uuid: string, prefix = "PD") => {
+  return `${prefix}-${uuid.split("-")[0].toUpperCase()}`;
+}

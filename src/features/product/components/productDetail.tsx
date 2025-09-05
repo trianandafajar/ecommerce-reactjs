@@ -10,40 +10,27 @@ import {
 } from "@/features/bookmark/bookmarkSlice";
 import { addToCart } from "@/features/cart/cartSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
+import { shortCodeFromUUID } from "../helper/product";
 
-interface ProductDetailProps {
-  productId: string;
-}
 
-export function ProductDetail({ productId }: ProductDetailProps) {
+export function ProductDetail() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-
   const dispatch = useAppDispatch();
+  const { selectedProduct: product, loading } = useAppSelector(state => state.product)
+
   const navigate = useNavigate();
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const isBookmarked = useAppSelector(selectIsBookmarked(productId));
+  const isBookmarked = useAppSelector(selectIsBookmarked(product.id));
 
-  // mock product data (nanti bisa fetch dari API/Redux slice)
-  const product = {
-    id: productId,
-    name: "Christopher PM",
-    code: "M14858",
-    price: "USD 6,700",
-    image_url: "/black-pixel-pattern-backpack-louis-vuitton-style.png",
-    material: "Autres Toiles",
-    description: `The Christopher PM backpack in raffia showcases the House's expertise...`,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
 
   const handleHeartClick = () => {
-    if (isBookmarked) {
-      dispatch(removeBookmark(product.id));
-    } else {
-      dispatch(addBookmark(product));
-    }
+    // if (isBookmarked) {
+    //   dispatch(removeBookmark(product.id));
+    // } else {
+    //   dispatch(addBookmark(product));
+    // }
   };
 
   const handleAddToCart = () => {
@@ -52,12 +39,14 @@ export function ProductDetail({ productId }: ProductDetailProps) {
       return;
     }
 
-    dispatch(addToCart(product));
+    // dispatch(addToCart(product));
   };
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
+
+  if (!product) return <p>Loading...</p>;
 
   return (
     <div className="bg-white ">
@@ -76,7 +65,7 @@ export function ProductDetail({ productId }: ProductDetailProps) {
           <div className="space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-2">{product.code}</p>
+                <p className="text-sm text-gray-600 mb-2">{shortCodeFromUUID(product.id)}</p>
                 <h1 className="text-2xl font-medium text-black mb-4">
                   {product.name}
                 </h1>
@@ -100,7 +89,7 @@ export function ProductDetail({ productId }: ProductDetailProps) {
             <div className="flex items-center justify-between py-4 border-b border-gray-200">
               <span className="text-black">Material</span>
               <div className="flex items-center gap-2">
-                <span className="text-black">{product.material}</span>
+                {/* <span className="text-black">test</span> */}
                 <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
@@ -132,8 +121,7 @@ export function ProductDetail({ productId }: ProductDetailProps) {
             <div className="space-y-4">
               <p className="text-gray-700 leading-relaxed">
                 {isExpanded
-                  ? product.description
-                  : `${product.description.substring(0, 200)}...`}
+                  ? product.description : `${product.description.substring(0, 200)}...`}
               </p>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}

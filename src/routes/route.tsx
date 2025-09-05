@@ -5,7 +5,7 @@ import ProductPage from "@/pages/productDetailPage";
 import CartPage from "@/pages/cartPage";
 import CheckoutPage from "@/pages/checkoutPage";
 import BookmarksPage from "@/pages/bookmarkPage";
-import { productLoader } from '@/routes/productLoader';
+import { productDetailLoader, productLoader } from '@/routes/productLoader';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +20,7 @@ export const router = createBrowserRouter([
   {
     path: "/product/:id",
     element: <ProductPage />,
+    loader: productDetailLoader,
   },
   {
     path: "/cart",
