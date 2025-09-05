@@ -6,12 +6,14 @@ import {
   createProduct,
   getDetailProduct,
 } from "./productThunks";
+import type { PaginationMeta } from "@/types/api";
 
 interface ProductState {
   items: Product[];
   selectedProduct: Product | null;
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: ProductState = {
@@ -19,6 +21,14 @@ const initialState: ProductState = {
   selectedProduct: null,
   loading: false,
   error: null,
+  pagination: {
+    page: 1,
+    per_page: 12,
+    total: 0,
+    has_next: false,
+    has_prev: false,
+    pages: 0
+  },
 };
 
 const productSlice = createSlice({
@@ -39,11 +49,17 @@ const productSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchProducts.fulfilled,
-        (state, action: PayloadAction<Product[]>) => {
+      .addCase(fetchProducts.fulfilled,(state, action: PayloadAction<{ items: Product[]; pagination: PaginationMeta }>) => {
           state.loading = false;
-          state.items = action.payload;
+          const { items, pagination } = action.payload;
+          if (pagination.page === 1) {
+            state.items = items;
+          } else {
+            state.items = [...state.items, ...items];
+          }
+
+          state.pagination = pagination;
+          
         }
       )
       .addCase(fetchProducts.rejected, (state, action) => {

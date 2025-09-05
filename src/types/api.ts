@@ -8,7 +8,7 @@ export interface Pagination {
 
 export interface Metadata {
   request_id?: string
-  pagination?: Pagination
+  pagination?: PaginationMeta
   extra?: Record<string, any>
 }
 
@@ -24,10 +24,19 @@ export interface StandardResponse<T> {
   message: string
   data: T
   error: Partial<ErrorInfo> | {}
-  metadata?: Metadata
+  metadata: Metadata
 }
 
 export interface PaginationResource {
     skip: number
     limit: number
+}
+
+export interface PaginationMeta {
+  page: number;
+  per_page: number;
+  total: number;
+  pages: number;
+  has_next: boolean;
+  has_prev: boolean;
 }
