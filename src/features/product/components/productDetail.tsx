@@ -2,13 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, ChevronRight, Plus, ShoppingBag, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/app/hooks";
 import {
-  addBookmark,
-  removeBookmark,
   selectIsBookmarked,
 } from "@/features/bookmark/bookmarkSlice";
-import { addToCart } from "@/features/cart/cartSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 import { shortCodeFromUUID } from "../helper/product";
 
@@ -16,13 +13,11 @@ import { shortCodeFromUUID } from "../helper/product";
 export function ProductDetail() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
-  const { selectedProduct: product, loading } = useAppSelector(state => state.product)
-
+  const { selectedProduct: product } = useAppSelector(state => state.product)
   const navigate = useNavigate();
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const isBookmarked = useAppSelector(selectIsBookmarked(product.id));
+  const isBookmarked = useAppSelector(selectIsBookmarked(product?.id || ""));
 
 
   const handleHeartClick = () => {
