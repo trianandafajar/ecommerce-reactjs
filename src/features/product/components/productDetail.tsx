@@ -52,7 +52,12 @@ export function ProductDetail({ productId }: ProductDetailProps) {
       return;
     }
 
-    dispatch(addToCart(product));
+    dispatch(addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url,
+    }));
   };
 
   const toggleSection = (section: string) => {
