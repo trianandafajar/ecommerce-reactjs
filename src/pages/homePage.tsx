@@ -31,7 +31,6 @@ export default function HomePage() {
     if (pagination?.has_next) {
       observer.observe(loaderRef.current);
     } else {
-      // stop observe kalau sudah habis
       observer.unobserve(loaderRef.current);
     }
 
@@ -43,7 +42,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <main className="p-4">
+      <main>
         {error && <p className="text-red-500">Gagal memuat produk: {error}</p>}
 
         <ProductContainer>
@@ -52,7 +51,6 @@ export default function HomePage() {
           ))}
         </ProductContainer>
 
-        {/* Loader indicator */}
         <div ref={loaderRef} className="flex justify-center p-4">
           {loading && <p className="text-gray-500">Loading more...</p>}
           {!loading && !pagination?.has_next && (
