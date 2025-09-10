@@ -1,9 +1,16 @@
 import type { Product } from "@/features/product/types/product";
 
+export interface CartItem {
+  id: string;
+  cart_id: string;
+  product_id: string;
+  quantity: number;
+  product: Product;
+}
+
 export interface Cart {
-    user_id: string;
-    session_token: string;
-    id: string;
-    created_at: Date;
-    items: Product[]
+  id: string;
+  user_id?: string | null;
+  created_at: string;
+  items: CartItem[];
 }

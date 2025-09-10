@@ -1,8 +1,7 @@
-import { type Product } from './../product/types/product';
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { Cart } from "./types/cart";
-import { GET, POST } from "@/lib/api";
-import { type StandardResponse } from "@/types/api";
+import { GET, POST, PUT } from "@/lib/api";
+import type { Cart, CartItem } from "./types/cart";
+import type { StandardResponse } from "@/types/api";
 
 // -------------------- FETCH CART --------------------
 export const fetchSessionCart = createAsyncThunk<
@@ -12,7 +11,6 @@ export const fetchSessionCart = createAsyncThunk<
 >("cart/fetchSession", async (cart_id, { rejectWithValue }) => {
   try {
     const res = await GET<StandardResponse<Cart>>(`/carts/${cart_id}`);
-
     if (res.status !== "success") {
       return rejectWithValue(res.message);
     }
@@ -26,14 +24,13 @@ export const fetchSessionCart = createAsyncThunk<
 // -------------------- CREATE CART --------------------
 export const createCart = createAsyncThunk<
   Cart,
-  { user_id?: string; session_token: string },
+  undefined,
   { rejectValue: string }
->("cart/createCart", async (payload, { rejectWithValue }) => {
+>("cart/createCart", async (_, { rejectWithValue }) => {
   try {
-    const res = await POST<
-      StandardResponse<Cart>,
-      { user_id?: string; session_token: string }
-    >("/carts", payload);
+    const res = await POST<StandardResponse<Cart>>(
+      "/carts/",
+    );
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);
@@ -48,13 +45,11 @@ export const createCart = createAsyncThunk<
 // -------------------- LOOKUP CART --------------------
 export const lookupCart = createAsyncThunk<
   Cart,
-  { user_id?: string; session_id?: string },
+  { session_id?: string },
   { rejectValue: string }
 >("cart/lookupCart", async (payload, { rejectWithValue }) => {
   try {
-    const query = payload.user_id
-      ? `user_id=${payload.user_id}`
-      : `session_id=${payload.session_id}`;
+    const query = payload.session_id ? `session_id=${payload.session_id}` : "";
     const res = await GET<StandardResponse<Cart>>(`/carts/lookup?${query}`);
 
     if (res.status !== "success") {
@@ -75,7 +70,7 @@ export const addCartItem = createAsyncThunk<
 >("cart/addItem", async ({ cart_id, product_id, quantity }, { rejectWithValue }) => {
   try {
     const res = await POST<
-      StandardResponse<Product>
+      StandardResponse<CartItem>
     >(`/carts/${cart_id}/items`, { product_id, quantity });
 
     if (res.status !== "success") {
@@ -95,10 +90,9 @@ export const updateCartItem = createAsyncThunk<
   { rejectValue: string }
 >("cart/updateItem", async ({ cart_id, item_id, quantity }, { rejectWithValue }) => {
   try {
-    const res = await POST<
-      StandardResponse<CartItem>,
-      { quantity: number }
-    >(`/carts/${cart_id}/items/${item_id}?_method=PUT`, { quantity });
+    const res = await PUT<
+      StandardResponse<CartItem>
+    >(`/carts/${cart_id}/items/${item_id}`, { quantity });
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);
@@ -126,7 +120,7 @@ export const deleteCartItem = createAsyncThunk<
       throw new Error(`Failed with status ${res.status}`);
     }
 
-    const data: StandardResponse<{}> = await res.json();
+    const data: StandardResponse<null> = await res.json();
     if (data.status !== "success") {
       return rejectWithValue(data.message);
     }

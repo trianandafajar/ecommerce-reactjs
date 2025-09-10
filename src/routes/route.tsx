@@ -12,6 +12,7 @@ import NotFoundPage from "@/pages/NotFoundPage";
 import VerifyOtpPage from "@/pages/VerifyOtpPage";
 
 import { productDetailLoader, productLoader } from "@/routes/productLoader";
+import { cartLoader } from "@/routes/cartLoader";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicRoute from "@/routes/PublicRoute";
 
@@ -42,7 +43,7 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { path: "/cart", element: <CartPage /> },
+      { path: "/cart", element: <CartPage />, loader: cartLoader },
       { path: "/checkout", element: <CheckoutPage /> },
       { path: "/bookmarks", element: <BookmarksPage /> },
     ],

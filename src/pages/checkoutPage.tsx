@@ -4,12 +4,14 @@ import { useNavigate, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Header } from "@/components/header"
-import { ArrowLeft, CreditCard, Truck, Shield } from "lucide-react"
+import { ArrowLeft, CreditCard, Truck, 
+  // Shield
+ } from "lucide-react"
 import {
+  resetCart,
   selectCartItems,
-  selectTotalItems,
-  selectTotalPrice,
-  clearCart,
+  // selectTotalItems,
+  // selectTotalPrice,
 } from "@/features/cart/cartSlice"
 import { selectIsAuthenticated } from "@/features/auth/authSlice"
 
@@ -18,8 +20,8 @@ export default function CheckoutPage() {
   const navigate = useNavigate()
 
   const items = useAppSelector(selectCartItems)
-  const totalItems = useAppSelector(selectTotalItems)
-  const totalPrice = useAppSelector(selectTotalPrice)
+  // const totalItems = useAppSelector(selectTotalItems)
+  // const totalPrice = useAppSelector(selectTotalPrice)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
 
   const [formData, setFormData] = useState({
@@ -46,11 +48,11 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     alert("Order placed successfully! Thank you for your purchase.")
-    dispatch(clearCart())
+    dispatch(resetCart())
     navigate("/")
   }
 
-  const safeTotalPrice = isNaN(totalPrice) ? 0 : totalPrice
+  // const safeTotalPrice = isNaN(totalPrice) ? 0 : totalPrice
 
   if (!isAuthenticated) {
     return (
@@ -205,14 +207,14 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order Summary */}
-          <div>
+          {/* <div>
             <div className="bg-gray-50 p-6 rounded">
               <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
               <div className="space-y-4 mb-6">
                 {items.map((item) => (
                   <div key={`${item.id}-${item.quantity}`} className="flex gap-4">
                     <div className="w-16 h-16 bg-white rounded">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded" />
+                      <img src={item.image} alt={item.} className="w-full h-full object-cover rounded" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-sm">{item.name}</h3>
@@ -257,7 +259,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

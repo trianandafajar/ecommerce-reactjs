@@ -2,23 +2,28 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, ChevronRight, Plus, ShoppingBag, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/app/hooks";
-import {
-  selectIsBookmarked,
-} from "@/features/bookmark/bookmarkSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { selectIsBookmarked } from "@/features/bookmark/bookmarkSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 import { shortCodeFromUUID } from "../helper/product";
-
+import { selectCart } from "@/features/cart/cartSlice";
+import {
+  addCartItem,
+  createCart,
+} from "@/features/cart/cartThunks";
 
 export function ProductDetail() {
+  const dispatch = useAppDispatch();
+  const cart = useAppSelector(selectCart);
+
+  const { selectedProduct: product } = useAppSelector((state) => state.product);
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const { selectedProduct: product } = useAppSelector(state => state.product)
   const navigate = useNavigate();
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isBookmarked = useAppSelector(selectIsBookmarked(product?.id || ""));
-
 
   const handleHeartClick = () => {
     // if (isBookmarked) {
@@ -28,20 +33,42 @@ export function ProductDetail() {
     // }
   };
 
-  const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      navigate("/auth/login");
-      return;
-    }
-
-    // dispatch(addToCart(product));
-  };
-
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
 
   if (!product) return <p>Loading...</p>;
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
+
+    let cartId = cart?.id;
+
+    if (!cartId) {
+      try {
+        const newCart = await dispatch(createCart()).unwrap();
+        cartId = newCart.id; // ambil ID cart baru
+      } catch (err) {
+        console.error("Failed to create cart:", err);
+        return;
+      }
+    }
+
+    try {
+      await dispatch(
+        addCartItem({
+          cart_id: cartId,
+          product_id: product.id,
+          quantity: 1,
+        })
+      );
+    } catch (err: any) {
+      console.error("Failed to add item:", err);
+    }
+  };
 
   return (
     <div className="bg-white ">
@@ -60,7 +87,9 @@ export function ProductDetail() {
           <div className="space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-2">{shortCodeFromUUID(product.id)}</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  {shortCodeFromUUID(product.id)}
+                </p>
                 <h1 className="text-2xl font-medium text-black mb-4">
                   {product.name}
                 </h1>
@@ -116,7 +145,8 @@ export function ProductDetail() {
             <div className="space-y-4">
               <p className="text-gray-700 leading-relaxed">
                 {isExpanded
-                  ? product.description : `${product.description.substring(0, 200)}...`}
+                  ? product.description
+                  : `${product.description.substring(0, 200)}...`}
               </p>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}

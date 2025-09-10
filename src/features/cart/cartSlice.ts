@@ -1,84 +1,128 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "@/app/store";
-
-export interface CartItem {
-  id: string;
-  name: string;
-  price: string;
-  image: string;
-  quantity: number;
-}
+import type { Cart, CartItem } from "@/features/cart/types/cart";
+import {
+  fetchSessionCart,
+  createCart,
+  lookupCart,
+  addCartItem,
+  updateCartItem,
+  deleteCartItem,
+} from "./cartThunks";
 
 interface CartState {
+  cart: Cart | null;
   items: CartItem[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: CartState = {
+  cart: null,
   items: [],
+  loading: false,
+  error: null,
 };
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    loadCartFromStorage: (state) => {
-      const savedCart = localStorage.getItem("cart");
-      if (savedCart) {
-        state.items = JSON.parse(savedCart);
-      }
-    },
-    addToCart: (state, action: PayloadAction<Omit<CartItem, "quantity">>) => {
-      const existing = state.items.find((item) => item.id === action.payload.id);
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        state.items.push({ ...action.payload, quantity: 1 });
-      }
-      localStorage.setItem("cart", JSON.stringify(state.items));
-    },
-    removeFromCart: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter((item) => item.id !== action.payload);
-      localStorage.setItem("cart", JSON.stringify(state.items));
-    },
-    updateQuantity: (
-      state,
-      action: PayloadAction<{ id: string; quantity: number }>
-    ) => {
-      const { id, quantity } = action.payload;
-      if (quantity <= 0) {
-        state.items = state.items.filter((item) => item.id !== id);
-      } else {
-        const target = state.items.find((item) => item.id === id);
-        if (target) target.quantity = quantity;
-      }
-      localStorage.setItem("cart", JSON.stringify(state.items));
-    },
-    clearCart: (state) => {
+    resetCart: (state) => {
+      state.cart = null;
       state.items = [];
-      localStorage.removeItem("cart");
+      state.error = null;
+      state.loading = false;
     },
+  },
+  extraReducers: (builder) => {
+    // 📦 FETCH CART
+    builder
+      .addCase(fetchSessionCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSessionCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cart = action.payload;
+        state.items = action.payload.items;
+      })
+      .addCase(fetchSessionCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to fetch cart";
+      });
+
+    // 🆕 CREATE CART
+    builder
+      .addCase(createCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cart = action.payload;
+        state.items = action.payload.items;
+      })
+      .addCase(createCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to create cart";
+      });
+
+    // 🔍 LOOKUP CART
+    builder
+      .addCase(lookupCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(lookupCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cart = action.payload;
+        state.items = action.payload.items;
+      })
+      .addCase(lookupCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to lookup cart";
+      });
+
+    // ➕ ADD ITEM
+    builder.addCase(addCartItem.fulfilled, (state, action) => {
+      const existing = state.items.find((i) => i.id === action.payload.id);
+      if (existing) {
+        existing.quantity = action.payload.quantity;
+      } else {
+        state.items.push(action.payload);
+      }
+    });
+
+    // ✏️ UPDATE ITEM
+    builder.addCase(updateCartItem.fulfilled, (state, action) => {
+      const idx = state.items.findIndex((i) => i.id === action.payload.id);
+      if (idx !== -1) {
+        state.items[idx] = action.payload;
+      }
+    });
+
+    // ❌ DELETE ITEM
+    builder.addCase(deleteCartItem.fulfilled, (state, action) => {
+      state.items = state.items.filter((i) => i.id !== action.payload.id);
+    });
   },
 });
 
-export const {
-  loadCartFromStorage,
-  addToCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-} = cartSlice.actions;
-
+export const { resetCart } = cartSlice.actions;
 export default cartSlice.reducer;
 
 // 🔍 Selectors
+export const selectCart = (state: RootState) => state.cart.cart;
 export const selectCartItems = (state: RootState) => state.cart.items;
+export const selectCartLoading = (state: RootState) => state.cart.loading;
+export const selectCartError = (state: RootState) => state.cart.error;
 
 export const selectTotalItems = (state: RootState) =>
   state.cart.items.reduce((total, item) => total + item.quantity, 0);
 
 export const selectTotalPrice = (state: RootState) =>
-  state.cart.items.reduce((total, item) => {
-    const priceString = item.price.replace(/[^\d,]/g, "");
-    const price = Number.parseFloat(priceString.replace(/,/g, ""));
-    return total + (isNaN(price) ? 0 : price) * item.quantity;
-  }, 0);
+  state.cart.items.reduce(
+    (total, item) => total + (item.product.price ?? 0) * item.quantity,
+    0
+  );
