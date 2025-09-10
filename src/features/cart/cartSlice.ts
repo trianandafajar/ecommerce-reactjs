@@ -13,44 +13,6 @@ interface CartState {
   items: CartItem[];
 }
 
-const dummyCartItems: CartItem[] = [
-  {
-    id: "1",
-    name: "Christopher MM",
-    price: "USD 3,950",
-    image: "/black-pixel-pattern-backpack-louis-vuitton-style.png",
-    quantity: 2,
-  },
-  {
-    id: "2",
-    name: "Christopher PM",
-    price: "USD 6,700",
-    image: "/black-pixel-pattern-backpack-louis-vuitton-style.png",
-    quantity: 1,
-  },
-  {
-    id: "3",
-    name: "Christopher MM Mon Monogram",
-    price: "USD 4,250",
-    image: "/black-pixel-pattern-backpack-louis-vuitton-style.png",
-    quantity: 3,
-  },
-  {
-    id: "4",
-    name: "Christopher Eclipse",
-    price: "USD 4,780",
-    image: "/black-pixel-pattern-backpack-louis-vuitton-style.png",
-    quantity: 1,
-  },
-  {
-    id: "5",
-    name: "Christopher Damier",
-    price: "USD 4,550",
-    image: "/black-pixel-pattern-backpack-louis-vuitton-style.png",
-    quantity: 2,
-  },
-];
-
 const initialState: CartState = {
   items: [],
 };
@@ -63,9 +25,6 @@ const cartSlice = createSlice({
       const savedCart = localStorage.getItem("cart");
       if (savedCart) {
         state.items = JSON.parse(savedCart);
-      } else {
-        // optional: preload dummy data on first run
-        state.items = dummyCartItems;
       }
     },
     addToCart: (state, action: PayloadAction<Omit<CartItem, "quantity">>) => {

@@ -25,7 +25,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login")
+      navigate("/auth/login")
     }
   }, [isAuthenticated, navigate])
 

@@ -26,7 +26,7 @@ export function Header() {
     if (isAuthenticated) {
       dispatch(logoutThunk());
     } else {
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     }
   };
 
@@ -88,11 +88,11 @@ export function Header() {
               size="sm"
               className="text-black cursor-pointer hover:bg-gray-50 px-2 sm:px-3 flex items-center gap-1"
               onClick={handleUserClick}
-              title={isAuthenticated ? `Logout (${user?.username})` : "Login"}
+              title={isAuthenticated ? `Logout (${user?.name})` : "Login"}
             >
               {isAuthenticated ? <LogOut className="w-4 h-4" /> : <User className="w-4 h-4" />}
               <span className="text-xs hidden sm:inline">
-                {isAuthenticated ? user?.username : "Login"}
+                {isAuthenticated ? user?.name : "Login"}
               </span>
             </Button>
           </div>

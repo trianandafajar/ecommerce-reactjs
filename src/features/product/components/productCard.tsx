@@ -26,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate("/auth/login");
       return;
     }
 
@@ -61,7 +61,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <h3 className="text-black font-medium mb-2 line-clamp-1 [text-overflow:clip]">
           {product.name}
         </h3>
-        <p className="text-black text-sm">{product.price}</p>
+       <p className="text-black text-sm">
+          {new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(product.price)}
+        </p>
       </div>
     </Link>
   );

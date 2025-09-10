@@ -21,10 +21,7 @@ export const fetchProducts = createAsyncThunk<
         per_page: payload.per_page 
       },
     });
-
-    console.log('res', res.metadata.pagination,);
     
-
     if (res.status !== "success") {
       return rejectWithValue(res.message);
     }

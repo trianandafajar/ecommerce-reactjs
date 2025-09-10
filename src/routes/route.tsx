@@ -5,7 +5,15 @@ import ProductPage from "@/pages/productDetailPage";
 import CartPage from "@/pages/cartPage";
 import CheckoutPage from "@/pages/checkoutPage";
 import BookmarksPage from "@/pages/bookmarkPage";
-import { productDetailLoader, productLoader } from '@/routes/productLoader';
+import RegisterPage from "@/pages/RegisterPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import NotFoundPage from "@/pages/NotFoundPage";
+import VerifyOtpPage from "@/pages/VerifyOtpPage";
+
+import { productDetailLoader, productLoader } from "@/routes/productLoader";
+import ProtectedRoute from "@/routes/ProtectedRoute";
+import PublicRoute from "@/routes/PublicRoute";
 
 export const router = createBrowserRouter([
   {
@@ -13,25 +21,35 @@ export const router = createBrowserRouter([
     element: <HomePage />,
     loader: productLoader,
   },
+
   {
-    path: "/login",
-    element: <LoginPage />,
+    element: <PublicRoute />,
+    children: [
+      { path: "/auth/login", element: <LoginPage /> },
+      { path: "/auth/register", element: <RegisterPage /> },
+      { path: "/auth/reset-password", element: <ResetPasswordPage /> },
+      { path: "/auth/verify-otp", element: <VerifyOtpPage /> },
+      { path: "/auth/forgot-password", element: <ForgotPasswordPage /> },
+    ],
   },
+
   {
     path: "/product/:id",
     element: <ProductPage />,
     loader: productDetailLoader,
   },
+
   {
-    path: "/cart",
-    element: <CartPage />,
+    element: <ProtectedRoute />,
+    children: [
+      { path: "/cart", element: <CartPage /> },
+      { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/bookmarks", element: <BookmarksPage /> },
+    ],
   },
+
   {
-    path: "/checkout",
-    element: <CheckoutPage />,
-  },
-  {
-    path: "/bookmarks",
-    element: <BookmarksPage />,
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);

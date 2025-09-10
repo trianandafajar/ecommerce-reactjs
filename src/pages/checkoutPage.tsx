@@ -35,7 +35,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login")
+      navigate("/auth/login")
     }
   }, [isAuthenticated, navigate])
 

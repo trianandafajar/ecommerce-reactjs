@@ -1,36 +1,32 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { loginThunk } from "@/features/auth/authThunks";
 import {
   selectAuthError,
   selectAuthLoading,
-//   selectIsAuthenticated,
 } from "@/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/header";
-import { Link } from "react-router-dom";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const isLoading = useAppSelector(selectAuthLoading);
   const error = useAppSelector(selectAuthError);
-//   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // dispatch loginThunk
-    const result = await dispatch(loginThunk({ username, password }));
+    const result = await dispatch(loginThunk({ email, password }));
 
     if (loginThunk.fulfilled.match(result)) {
-      navigate("/"); // redirect ke home
+      navigate("/"); // redirect ke home setelah login sukses
     }
   };
 
@@ -48,18 +44,18 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Username
+                Email
               </label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-black focus:border-transparent"
-                placeholder="Enter your username"
+                placeholder="Enter your email"
                 required
               />
             </div>
@@ -97,20 +93,21 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-8 text-center">
-            <div className="bg-gray-50 p-4 rounded">
-              <p className="text-sm text-gray-600 mb-2">Demo Credentials:</p>
-              <p className="text-sm font-mono">
-                Username: <strong>admin</strong>
-              </p>
-              <p className="text-sm font-mono">
-                Password: <strong>admin</strong>
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Link to="/" className="text-sm text-gray-600 hover:text-black">
+          {/* extra links */}
+          <div className="mt-6 text-center space-y-2">
+            <Link
+              to="/auth/forgot-password"
+              className="block text-sm text-gray-600 hover:text-black"
+            >
+              Forgot your password?
+            </Link>
+            <Link
+              to="/auth/register"
+              className="block text-sm text-gray-600 hover:text-black"
+            >
+              Don’t have an account? Register
+            </Link>
+            <Link to="/" className="block text-sm text-gray-600 hover:text-black">
               ← Back to Home
             </Link>
           </div>

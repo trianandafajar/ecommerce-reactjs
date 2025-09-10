@@ -30,7 +30,7 @@ export function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate("/auth/login");
       return;
     }
 

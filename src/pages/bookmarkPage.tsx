@@ -15,7 +15,7 @@ export default function BookmarksPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login")
+      navigate("/auth/login")
     }
   }, [isAuthenticated, navigate])
 
