@@ -9,6 +9,7 @@ import { selectBookmarkCount } from "@/features/bookmark/bookmarkSlice";
 import { selectCartItems } from "@/features/cart/cartSlice";
 import { selectIsAuthenticated, selectUser } from "@/features/auth/authSlice";
 import { logoutThunk } from "@/features/auth/authThunks";
+import { selectSearchQuery } from "@/features/search/searchSlice"; // ✅ ambil query terakhir
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,6 +22,7 @@ export function Header() {
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
+  const searchQuery = useAppSelector(selectSearchQuery); // ✅ state global
 
   const handleUserClick = () => {
     if (isAuthenticated) {
@@ -29,6 +31,14 @@ export function Header() {
       window.location.href = "/auth/login";
     }
   };
+
+  // ✅ kalau ada query → potong maksimal 10 huruf
+  const searchLabel =
+    searchQuery.trim() !== ""
+      ? searchQuery.length > 20
+        ? searchQuery.slice(0, 20) + "..."
+        : searchQuery
+      : "Search";
 
   return (
     <>
@@ -56,7 +66,7 @@ export function Header() {
               className="flex items-center gap-1 sm:gap-2 text-black hover:bg-gray-50 px-2 sm:px-3 cursor-pointer"
             >
               <Search className="w-4 h-4" />
-              <span className="text-sm hidden sm:inline">Search</span>
+              <span className="text-sm hidden sm:inline">{searchLabel}</span>
             </Button>
           </div>
 

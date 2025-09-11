@@ -7,6 +7,7 @@ import { GET, POST } from "@/lib/api";
 export interface PaginationResource {
   page: number;
   per_page: number;
+  search?: string
 }
 
 export const fetchProducts = createAsyncThunk<
@@ -18,7 +19,8 @@ export const fetchProducts = createAsyncThunk<
     const res = await GET<StandardResponse<Product[]>>("/products/", {
       params: { 
         page: payload.page, 
-        per_page: payload.per_page 
+        per_page: payload.per_page,
+        ...(payload.search ? { search: payload.search } : {})
       },
     });
     

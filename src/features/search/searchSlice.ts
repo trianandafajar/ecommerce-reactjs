@@ -1,37 +1,19 @@
-// src/features/search/searchSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/app/store";
+import { fetchSearchSuggestions } from "./searchThunks";
 
 interface SearchState {
   query: string;
   results: string[];
+  loading: boolean;
+  error: string | null;
 }
-
-const searchData = [
-  "Christopher Backpack",
-  "Christopher PM",
-  "Christopher MM",
-  "Neverfull",
-  "Speedy",
-  "Twist",
-  "Capucines",
-  "Petite Malle",
-  "Alma",
-  "Keepall",
-  "Monogram Canvas",
-  "Damier Ebene",
-  "Epi Leather",
-  "Bags and Wallets",
-  "Women",
-  "Men",
-  "Jewelry",
-  "Watches",
-  "Perfumes and Beauty",
-];
 
 const initialState: SearchState = {
   query: "",
-  results: searchData.slice(0, 6), // default populer
+  results: [], // default populer
+  loading: false,
+  error: null,
 };
 
 const searchSlice = createSlice({
@@ -40,19 +22,27 @@ const searchSlice = createSlice({
   reducers: {
     setQuery: (state, action: PayloadAction<string>) => {
       state.query = action.payload;
-      if (state.query.trim() === "") {
-        state.results = searchData.slice(0, 6);
-      } else {
-        const filtered = searchData.filter((item) =>
-          item.toLowerCase().includes(state.query.toLowerCase())
-        );
-        state.results = filtered.slice(0, 8);
-      }
     },
     clearQuery: (state) => {
       state.query = "";
-      state.results = searchData.slice(0, 6);
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchSearchSuggestions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.results = [...state.results]
+      })
+      .addCase(fetchSearchSuggestions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.results = action.payload.slice(0, 8);
+      })
+      .addCase(fetchSearchSuggestions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Failed to fetch suggestions";
+        state.results = [];
+      });
   },
 });
 
@@ -62,3 +52,5 @@ export default searchSlice.reducer;
 // selectors
 export const selectSearchQuery = (state: RootState) => state.search.query;
 export const selectSearchResults = (state: RootState) => state.search.results;
+export const selectSearchLoading = (state: RootState) => state.search.loading;
+export const selectSearchError = (state: RootState) => state.search.error;
