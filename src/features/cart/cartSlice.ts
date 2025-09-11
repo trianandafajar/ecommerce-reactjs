@@ -8,6 +8,7 @@ import {
   addCartItem,
   updateCartItem,
   deleteCartItem,
+  clearCart,
 } from "./cartThunks";
 
 interface CartState {
@@ -29,7 +30,6 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     resetCart: (state) => {
-      state.cart = null;
       state.items = [];
       state.error = null;
       state.loading = false;
@@ -106,6 +106,17 @@ const cartSlice = createSlice({
     builder.addCase(deleteCartItem.fulfilled, (state, action) => {
       state.items = state.items.filter((i) => i.id !== action.payload.id);
     });
+
+    builder
+  .addCase(clearCart.fulfilled, (state, action) => {
+    state.items = [];
+    if (state.cart && state.cart.id === action.payload.cart_id) {
+      state.cart.items = [];
+    }
+  })
+  .addCase(clearCart.rejected, (state, action) => {
+    state.error = action.payload || "Failed to clear cart";
+  });
   },
 });
 

@@ -64,16 +64,18 @@ export const fetchCurrentUserThunk = createAsyncThunk<
   User,
   void,
   { rejectValue: string }
->("auth/me", async (_, { rejectWithValue }) => {
+>("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
   try {
     const res = await GET<StandardResponse<User>>("/auth/me");
 
     if (res.status !== "success") return rejectWithValue(res.message);
+
     return res.data;
   } catch (err: any) {
     return rejectWithValue(err.message || "Failed to fetch user");
   }
 });
+
 
 // LOGOUT
 export const logoutThunk = createAsyncThunk("auth/logout", async () => {

@@ -3,19 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { Heart, ChevronRight, Plus, ShoppingBag, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectIsBookmarked } from "@/features/bookmark/bookmarkSlice";
+import { selectIsBookmarked, addBookmark, removeBookmark } from "@/features/bookmark/bookmarkSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 import { shortCodeFromUUID } from "../helper/product";
 import { selectCart } from "@/features/cart/cartSlice";
-import {
-  addCartItem,
-  createCart,
-} from "@/features/cart/cartThunks";
+import { addCartItem, createCart } from "@/features/cart/cartThunks";
 
 export function ProductDetail() {
   const dispatch = useAppDispatch();
   const cart = useAppSelector(selectCart);
-
   const { selectedProduct: product } = useAppSelector((state) => state.product);
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,11 +22,12 @@ export function ProductDetail() {
   const isBookmarked = useAppSelector(selectIsBookmarked(product?.id || ""));
 
   const handleHeartClick = () => {
-    // if (isBookmarked) {
-    //   dispatch(removeBookmark(product.id));
-    // } else {
-    //   dispatch(addBookmark(product));
-    // }
+    if (!product) return;
+    if (isBookmarked) {
+      dispatch(removeBookmark(product.id));
+    } else {
+      dispatch(addBookmark(product));
+    }
   };
 
   const toggleSection = (section: string) => {
@@ -50,7 +47,7 @@ export function ProductDetail() {
     if (!cartId) {
       try {
         const newCart = await dispatch(createCart()).unwrap();
-        cartId = newCart.id; // ambil ID cart baru
+        cartId = newCart.id;
       } catch (err) {
         console.error("Failed to create cart:", err);
         return;
@@ -71,7 +68,7 @@ export function ProductDetail() {
   };
 
   return (
-    <div className="bg-white ">
+    <div className="bg-white">
       <div className="px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Image */}
@@ -113,7 +110,6 @@ export function ProductDetail() {
             <div className="flex items-center justify-between py-4 border-b border-gray-200">
               <span className="text-black">Material</span>
               <div className="flex items-center gap-2">
-                {/* <span className="text-black">test</span> */}
                 <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>

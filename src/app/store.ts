@@ -5,6 +5,7 @@ import bookmarkReducer from "@/features/bookmark/bookmarkSlice";
 import cartReducer from "@/features/cart/cartSlice";
 import searchReducer from "@/features/search/searchSlice"
 import productReduce from "@/features/product/productSlice"
+import orderReduce from '@/features/order/orderSlice'
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     cart: cartReducer,
     search: searchReducer,
     product: productReduce,
+    order: orderReduce,
   },
 });
 

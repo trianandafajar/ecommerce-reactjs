@@ -1,27 +1,29 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { useNavigate, Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Trash2, Plus, Minus } from "lucide-react"
-import { Header } from "@/components/header"
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useNavigate, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Trash2, Plus, Minus } from "lucide-react";
+import { Header } from "@/components/header";
 
 import {
+  clearCart,
   deleteCartItem,
   updateCartItem,
-} from "@/features/cart/cartThunks"
+} from "@/features/cart/cartThunks";
 import {
   resetCart,
   selectCartItems,
   selectTotalItems,
   selectTotalPrice,
-} from "@/features/cart/cartSlice"
+} from "@/features/cart/cartSlice";
 
 export default function CartPage() {
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const items = useAppSelector(selectCartItems)
-  const totalItems = useAppSelector(selectTotalItems)
-  const totalPrice = useAppSelector(selectTotalPrice)
+  const items = useAppSelector(selectCartItems);
+  const { cart } = useAppSelector((s) => s.cart);
+  const totalItems = useAppSelector(selectTotalItems);
+  const totalPrice = useAppSelector(selectTotalPrice);
 
   if (items.length === 0) {
     return (
@@ -44,8 +46,15 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
+
+  const handleClearCart = async () => {
+    if (cart?.id) {
+      await dispatch(clearCart(cart.id)).unwrap();
+    }
+    dispatch(resetCart());
+  };
 
   return (
     <div className="bg-white min-h-screen">
@@ -56,7 +65,7 @@ export default function CartPage() {
             Your Shopping Bag
           </h1>
           <Button
-            onClick={() => dispatch(resetCart())}
+            onClick={handleClearCart}
             variant="outline"
             className="flex items-center !rounded-none gap-2 text-red-600 border-red-600 hover:bg-red-50 w-fit sm:w-auto"
           >
@@ -107,8 +116,7 @@ export default function CartPage() {
               </h3>
               <div className="flex items-center justify-between">
                 <p className="text-gray-600 text-sm">
-                  USD{" "}
-                  {Number(item.product.price).toLocaleString()}
+                  USD {Number(item.product.price).toLocaleString()}
                 </p>
                 <div className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1">
                   <Button
@@ -175,5 +183,5 @@ export default function CartPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

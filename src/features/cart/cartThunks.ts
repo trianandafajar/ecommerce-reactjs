@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { GET, POST, PUT } from "@/lib/api";
+import { DELETE, GET, POST, PUT } from "@/lib/api";
 import type { Cart, CartItem } from "./types/cart";
 import type { StandardResponse } from "@/types/api";
 
@@ -129,5 +129,27 @@ export const deleteCartItem = createAsyncThunk<
   } catch (err: any) {
     console.error(err);
     return rejectWithValue(err.message || "Failed to delete item");
+  }
+});
+
+// ---------------------- DELETE ALL ITEM --------------------
+export const clearCart = createAsyncThunk<
+  { cart_id: string },
+  string, // cartId
+  { rejectValue: string }
+>("cart/clearCart", async (cartId, { rejectWithValue }) => {
+  try {
+    const res = await DELETE<StandardResponse<{ deleted_cart_id: string }>>(
+      `/carts/${cartId}/items`
+    );
+
+    if (res.status !== "success") {
+      return rejectWithValue(res.message);
+    }
+
+    return { cart_id: res.data.deleted_cart_id };
+  } catch (err: any) {
+    console.error(err);
+    return rejectWithValue(err.message || "Failed to clear cart");
   }
 });

@@ -11,8 +11,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import VerifyOtpPage from "@/pages/VerifyOtpPage";
 
-import { productDetailLoader, productLoader } from "@/routes/productLoader";
-import { cartLoader } from "@/routes/cartLoader";
+import { productDetailLoader } from "@/routes/productLoader";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicRoute from "@/routes/PublicRoute";
 
@@ -20,7 +19,6 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
-    loader: productLoader,
   },
 
   {
@@ -43,7 +41,7 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { path: "/cart", element: <CartPage />, loader: cartLoader },
+      { path: "/cart", element: <CartPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
       { path: "/bookmarks", element: <BookmarksPage /> },
     ],
