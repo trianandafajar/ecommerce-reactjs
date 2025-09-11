@@ -1,4 +1,3 @@
-// src/app/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from '@/features/auth/authSlice'
 import bookmarkReducer from "@/features/bookmark/bookmarkSlice";

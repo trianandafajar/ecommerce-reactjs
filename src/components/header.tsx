@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, Search, User, ShoppingBag, LogOut } from "lucide-react";
+import { Menu, Search, User, ShoppingBag, LogOut, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavigationSidebar } from "@/components/navigationSidebar";
 import { SearchModal } from "@/components/searchModal";
@@ -9,7 +9,7 @@ import { selectBookmarkCount } from "@/features/bookmark/bookmarkSlice";
 import { selectCartItems } from "@/features/cart/cartSlice";
 import { selectIsAuthenticated, selectUser } from "@/features/auth/authSlice";
 import { logoutThunk } from "@/features/auth/authThunks";
-import { selectSearchQuery } from "@/features/search/searchSlice"; // ✅ ambil query terakhir
+import { selectSearchQuery } from "@/features/search/searchSlice"; 
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +22,7 @@ export function Header() {
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
-  const searchQuery = useAppSelector(selectSearchQuery); // ✅ state global
+  const searchQuery = useAppSelector(selectSearchQuery); 
 
   const handleUserClick = () => {
     if (isAuthenticated) {
@@ -32,7 +32,6 @@ export function Header() {
     }
   };
 
-  // ✅ kalau ada query → potong maksimal 10 huruf
   const searchLabel =
     searchQuery.trim() !== ""
       ? searchQuery.length > 20
@@ -78,7 +77,17 @@ export function Header() {
             </Link>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <Link to="/admin/product/create" title="Add item">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-black cursor-pointer hover:bg-gray-50 px-2 sm:px-3 flex items-center justify-center"
+              >
+                {/* <span className="text-lg font-bold">+</span> */}
+                <Plus />
+              </Button>
+            </Link>
             <Link to="/cart">
               <Button
                 variant="ghost"

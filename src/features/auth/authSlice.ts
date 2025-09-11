@@ -95,35 +95,63 @@ const authSlice = createSlice({
       })
 
       // REQUEST RESET PASSWORD
+      .addCase(requestPasswordResetThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null
+      })
       .addCase(requestPasswordResetThunk.fulfilled, (state, action) => {
         state.message = action.payload;
+        state.loading = false
       })
       .addCase(requestPasswordResetThunk.rejected, (state, action) => {
         state.error = action.payload || "Failed to request reset";
+        state.loading = false
       })
 
       // VERIFY OTP
+      .addCase(verifyOtpThunk.pending, (state) => {
+        state.loading = true
+        state.error = null
+        state.message = null
+      })
       .addCase(verifyOtpThunk.fulfilled, (state, action) => {
         state.message = action.payload;
+        state.loading = false
       })
       .addCase(verifyOtpThunk.rejected, (state, action) => {
         state.error = action.payload || "OTP verification failed";
+        state.loading = false
       })
 
       // RESET PASSWORD
+      .addCase(resetPasswordThunk.pending, (state) => {
+        state.loading = true
+        state.error = null
+        state.message = null
+      })
       .addCase(resetPasswordThunk.fulfilled, (state, action) => {
         state.message = action.payload;
+        state.loading = false
       })
       .addCase(resetPasswordThunk.rejected, (state, action) => {
         state.error = action.payload || "Password reset failed";
+        state.loading = false
       })
 
       // CHANGE PASSWORD
+      .addCase(changePasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null
+        state.message = null
+      })
       .addCase(changePasswordThunk.fulfilled, (state, action) => {
         state.message = action.payload;
+        state.loading = false;
       })
       .addCase(changePasswordThunk.rejected, (state, action) => {
         state.error = action.payload || "Password change failed";
+        state.loading = false
       });
   },
 });

@@ -35,7 +35,7 @@ export interface Order {
 // create order payload
 export interface OrderCreate {
   user_id?: string;
-  status?: "pending" | "paid" | "shipped" | "completed" | "cancelled"; // optional, backend bisa default ke pending
+  status?: "pending" | "paid" | "shipped" | "completed" | "cancelled"; 
   payment_method: "cod" | "bank_transfer";
   first_name?: string;
   last_name?: string;

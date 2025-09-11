@@ -19,6 +19,7 @@ export default function CheckoutPage() {
 
   const items = useAppSelector(selectCartItems);
   const { cart } = useAppSelector(s => s.cart)
+  const { loading } = useAppSelector(s => s.order)
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ export default function CheckoutPage() {
     city: "",
     postalCode: "",
     phone: "",
-    paymentMethod: "cod", // default
+    paymentMethod: "cod",
   });
 
   useEffect(() => {
@@ -47,7 +48,6 @@ export default function CheckoutPage() {
 
     if (items.length === 0) return;
 
-    // Build payload
     const orderItems = items.map((item) => ({
       product_id: item.product.id,
       quantity: item.quantity,
@@ -126,22 +126,6 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Contact Info */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4">
-                  Contact Information
-                </h2>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Email address"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="mb-4"
-                />
-              </div>
-
               {/* Shipping Address */}
               <div>
                 <h2 className="text-lg font-semibold mb-4">Shipping Address</h2>
@@ -216,14 +200,14 @@ export default function CheckoutPage() {
                   <div className="flex items-center gap-3 p-4 border border-gray-200 rounded">
                     <input
                       type="radio"
-                      id="bank-transfer"
+                      id="bank_transfer"
                       name="paymentMethod"
-                      value="bank-transfer"
-                      checked={formData.paymentMethod === "bank-transfer"}
+                      value="bank_transfer"
+                      checked={formData.paymentMethod === "bank_transfer"}
                       onChange={handleInputChange}
                     />
                     <CreditCard className="w-5 h-5" />
-                    <label htmlFor="bank-transfer" className="flex-1">
+                    <label htmlFor="bank_transfer" className="flex-1">
                       Bank Transfer
                     </label>
                   </div>
@@ -232,9 +216,17 @@ export default function CheckoutPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-black text-white hover:bg-gray-800 py-4 text-lg"
+                disabled={loading}
+                className="w-full bg-black text-white hover:bg-gray-800 py-4 text-lg flex items-center justify-center gap-2"
               >
-                Complete Order
+                {loading ? (
+                  <>
+                    <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
+                    Processing...
+                  </>
+                ) : (
+                  "Complete Order"
+                )}
               </Button>
             </form>
           </div>

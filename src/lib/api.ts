@@ -1,5 +1,5 @@
 // src/utils/api.ts
-import api from "./axios"; // file axios yang sudah pakai cookie
+import api from "./axios";
 
 interface RequestOptions {
   params?: Record<string, any>;

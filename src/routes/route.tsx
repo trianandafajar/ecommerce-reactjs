@@ -14,13 +14,17 @@ import VerifyOtpPage from "@/pages/VerifyOtpPage";
 import { productDetailLoader } from "@/routes/productLoader";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicRoute from "@/routes/PublicRoute";
+import CreateProductPage from "@/pages/CreateProductPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
   },
-
+  {
+    path: "/admin/product/create",
+    element: <CreateProductPage />
+  },
   {
     element: <PublicRoute />,
     children: [
