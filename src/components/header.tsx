@@ -72,7 +72,7 @@ export function Header() {
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Link to="/" className="cursor-pointer hover:opacity-80 transition-opacity">
               <h1 className="text-lg sm:text-xl font-bold tracking-wider text-black">
-                REACT MARKET
+                KEYSTHETIX
               </h1>
             </Link>
           </div>

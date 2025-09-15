@@ -43,7 +43,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main>
-        {error && <p className="text-red-500">Gagal memuat produk: {error}</p>}
+        {error && <p className="text-red-500">Failed to load products: {error}</p>}
 
         <ProductContainer>
           {products.map((product) => (
@@ -54,7 +54,7 @@ export default function HomePage() {
         <div ref={loaderRef} className="flex justify-center p-4">
           {loading && <p className="text-gray-500">Loading more...</p>}
           {!loading && !pagination?.has_next && (
-            <p className="text-gray-400">Semua produk sudah ditampilkan.</p>
+            <p className="text-gray-400">All products have been displayed.</p>
           )}
         </div>
       </main>

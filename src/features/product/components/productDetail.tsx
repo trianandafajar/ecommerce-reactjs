@@ -90,7 +90,7 @@ export function ProductDetail() {
                 <h1 className="text-2xl font-medium text-black mb-4">
                   {product.name}
                 </h1>
-                <p className="text-lg text-black">{product.price}</p>
+                <p className="text-lg text-black">$ {product.price}.00</p>
               </div>
               <Button
                 variant="ghost"

@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Header } from "@/components/header";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@gmail.com");
+  const [password, setPassword] = useState("password");
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function LoginPage() {
     const result = await dispatch(loginThunk({ email, password }));
 
     if (loginThunk.fulfilled.match(result)) {
-      navigate("/"); // redirect ke home setelah login sukses
+      navigate("/"); 
     }
   };
 
