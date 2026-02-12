@@ -175,7 +175,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search CLICKEYS"
+            placeholder="Search NeoKeys"
             className="flex-1 px-4 py-4 text-lg outline-none"
             value={searchQuery}
             onChange={(e) => dispatch(setQuery(e.target.value))}
