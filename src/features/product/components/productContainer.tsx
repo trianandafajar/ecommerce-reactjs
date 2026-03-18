@@ -1,16 +1,21 @@
 import type React from "react";
+import { ProductCardSkeleton } from "./productCardSkeleton";
 
 interface ProductContainerProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  loading?: boolean;
 }
 
-const ProductContainer: React.FC<ProductContainerProps> = ({ children }) => {
+const ProductContainer: React.FC<ProductContainerProps> = ({ children, loading }) => {
   return (
-    <div className="container bg-gray-100 min-h-screen">
-      <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-          {children}
-        </div>
+    <div className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {loading 
+          ? Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={`skeleton-${i}`} />
+            ))
+          : children
+        }
       </div>
     </div>
   );

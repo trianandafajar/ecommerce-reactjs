@@ -161,22 +161,22 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-start justify-center pt-20"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-start justify-center pt-24 animate-in fade-in duration-300"
       onMouseDown={handleBackdropMouseDown}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="bg-white w-full max-w-2xl mx-4 shadow-2xl"
-        onMouseDown={(e) => e.stopPropagation()} // prevent backdrop close
+        className="bg-card w-full max-w-3xl mx-4 rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300"
+        onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center border-b border-gray-200">
-          <Search className="w-5 h-5 text-gray-400 ml-4" />
+        <div className="flex items-center border-b border-border bg-background">
+          <Search className="w-6 h-6 text-primary ml-6" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search NeoKeys"
-            className="flex-1 px-4 py-4 text-lg outline-none"
+            placeholder="Search NeoKeys..."
+            className="flex-1 px-6 py-6 text-xl bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
             value={searchQuery}
             onChange={(e) => dispatch(setQuery(e.target.value))}
             onKeyDown={handleKeyDown}
@@ -192,15 +192,15 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             variant="ghost"
             size="sm"
             onClick={handleClearAndClose}
-            className="mr-2 hover:bg-gray-100 cursor-pointer !rounded-none"
+            className="mr-3 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer rounded-full h-10 w-10 p-0 flex items-center justify-center transition-colors"
             aria-label="Clear search"
           >
             <X className="w-5 h-5" />
           </Button>
         </div>
 
-        <div className="p-6">
-          <div className="text-sm text-gray-600 mb-4">
+        <div className="p-4 bg-card">
+          <div className="text-sm font-medium text-muted-foreground mb-3 px-2">
             {searchQuery ? `Results for "${searchQuery}"` : "Type to search"}
           </div>
 
@@ -221,17 +221,17 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     key={item + "-" + idx}
                     role="option"
                     aria-selected={isHighlighted}
-                    className={`text-sm p-2 cursor-pointer rounded transition-colors ${
-                      isHighlighted ? "bg-gray-100" : "hover:bg-gray-50"
+                    className={`text-base p-4 cursor-pointer rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                      isHighlighted ? "bg-primary/10 text-primary border border-primary/20" : "hover:bg-muted text-foreground border border-transparent"
                     }`}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                     onMouseLeave={() => setHighlightedIndex(-1)}
                     onMouseDown={(e) => {
-                      // use onMouseDown to avoid losing focus before click
                       e.preventDefault();
                       handleClickSuggestion(idx);
                     }}
                   >
+                    <Search className={`w-4 h-4 ${isHighlighted ? 'text-primary' : 'text-muted-foreground'}`} />
                     {item}
                   </div>
                 );

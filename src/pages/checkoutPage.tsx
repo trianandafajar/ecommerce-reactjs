@@ -3,8 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
-import { ArrowLeft, CreditCard, Truck } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, ShieldCheck, ChevronRight, Check } from "lucide-react";
 
 import { selectCartItems, resetCart } from "@/features/cart/cartSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
@@ -73,9 +72,7 @@ export default function CheckoutPage() {
       }
 
       dispatch(resetCart());
-
-      alert("Order placed successfully! Thank you for your purchase.");
-      navigate("/");
+      navigate("/order-success");
     } catch (err: any) {
       alert("Failed to place order: " + (err.message || err));
     }
@@ -83,246 +80,209 @@ export default function CheckoutPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-white min-h-screen">
-        <Header />
-        <div className="flex items-center justify-center py-16">
-          <p className="text-gray-600">Redirecting to login...</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center text-foreground">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (items.length === 0) {
-    return (
-      <div className="bg-white min-h-screen">
-        <Header />
-        <div className="py-8 px-4 text-center">
-          <h1 className="text-2xl font-bold text-black mb-4">Checkout</h1>
-          <p className="text-gray-600 mb-8">Your cart is empty</p>
-          <Link to="/">
-            <Button className="bg-black text-white hover:bg-gray-800 px-8 py-3">
-              Continue Shopping
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const subtotal = items.reduce((acc, i) => acc + i.product.price * i.quantity, 0);
+  const tax = Math.round(subtotal * 0.1);
+  const total = subtotal + tax;
 
   return (
-    <div className="bg-white min-h-screen">
-      <Header />
-      <div className="py-8 px-4">
-        <div className="mb-8">
-          <Link
-            to="/cart"
-            className="flex items-center gap-2 text-gray-600 hover:text-black mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Cart
+    <main className="min-h-screen bg-background text-foreground py-12 px-6 lg:px-12 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-12">
+          <Link to="/cart" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all mb-6">
+            <ArrowLeft className="w-4 h-4" /> Back to cart
           </Link>
-          <h1 className="text-2xl font-bold text-black">Checkout</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Checkout</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Shipping Address */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Shipping Address</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Main Form Area */}
+          <div className="lg:col-span-12 xl:col-span-8 space-y-12">
+            
+            {/* Shipping Information */}
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">1</div>
+                <h2 className="text-xl font-bold">Shipping Information</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-card border rounded-2xl p-8">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold ml-1">First Name</label>
                   <Input
                     type="text"
                     name="firstName"
-                    placeholder="First name"
+                    placeholder="Enter your first name"
                     value={formData.firstName}
                     onChange={handleInputChange}
+                    className="h-12 rounded-xl"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold ml-1">Last Name</label>
                   <Input
                     type="text"
                     name="lastName"
-                    placeholder="Last name"
+                    placeholder="Enter your last name"
                     value={formData.lastName}
                     onChange={handleInputChange}
+                    className="h-12 rounded-xl"
                   />
                 </div>
-                <Input
-                  type="text"
-                  name="address"
-                  placeholder="Address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  required
-                  className="mb-4"
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-semibold ml-1">Address</label>
+                  <Input
+                    type="text"
+                    name="address"
+                    placeholder="Street address, city, state"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    required
+                    className="h-12 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold ml-1">City</label>
                   <Input
                     type="text"
                     name="city"
-                    placeholder="City"
+                    placeholder="City name"
                     value={formData.city}
                     onChange={handleInputChange}
+                    className="h-12 rounded-xl"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold ml-1">Postal Code</label>
                   <Input
                     type="text"
                     name="postalCode"
                     placeholder="Postal code"
                     value={formData.postalCode}
                     onChange={handleInputChange}
+                    className="h-12 rounded-xl"
                   />
                 </div>
-                <Input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone number"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                />
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-semibold ml-1">Phone Number</label>
+                  <Input
+                    type="tel"
+                    name="phone"
+                    placeholder="Your contact number"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="h-12 rounded-xl"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">2</div>
+                <h2 className="text-xl font-bold">Payment Method</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-card border rounded-2xl p-8">
+                <button 
+                  type="button"
+                  onClick={() => setFormData({...formData, paymentMethod: 'cod'})}
+                  className={`relative p-6 border rounded-2xl transition-all text-left flex items-start gap-4 ${formData.paymentMethod === 'cod' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
+                >
+                  <div className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${formData.paymentMethod === 'cod' ? 'border-primary' : 'border-muted-foreground'}`}>
+                    {formData.paymentMethod === 'cod' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 font-bold">
+                      <Truck className="w-5 h-5 text-primary" />
+                      <span>Cash on Delivery</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Pay when your order is delivered to your door.</p>
+                  </div>
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setFormData({...formData, paymentMethod: 'bank_transfer'})}
+                  className={`relative p-6 border rounded-2xl transition-all text-left flex items-start gap-4 ${formData.paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
+                >
+                  <div className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${formData.paymentMethod === 'bank_transfer' ? 'border-primary' : 'border-muted-foreground'}`}>
+                    {formData.paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 font-bold">
+                      <CreditCard className="w-5 h-5 text-primary" />
+                      <span>Bank Transfer</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Transfer assets via our secure banking nodes.</p>
+                  </div>
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <aside className="lg:col-span-12 xl:col-span-4 lg:sticky lg:top-24 h-fit">
+            <div className="bg-card border rounded-2xl p-8 space-y-8 shadow-sm">
+              <h2 className="text-xl font-bold border-b pb-6">Your Order</h2>
+              
+              <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="w-16 h-16 bg-muted rounded-xl overflow-hidden flex-shrink-0">
+                      <img src={item.product.image_url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-bold truncate">{item.product.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">Qty: {item.quantity}</p>
+                      <p className="text-sm font-bold mt-1">USD {(item.product.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Payment Method */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Payment Method</h2>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-4 border border-gray-200 rounded">
-                    <input
-                      type="radio"
-                      id="cod"
-                      name="paymentMethod"
-                      value="cod"
-                      checked={formData.paymentMethod === "cod"}
-                      onChange={handleInputChange}
-                    />
-                    <Truck className="w-5 h-5" />
-                    <label htmlFor="cod" className="flex-1">
-                      Cash on Delivery
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 border border-gray-200 rounded">
-                    <input
-                      type="radio"
-                      id="bank_transfer"
-                      name="paymentMethod"
-                      value="bank_transfer"
-                      checked={formData.paymentMethod === "bank_transfer"}
-                      onChange={handleInputChange}
-                    />
-                    <CreditCard className="w-5 h-5" />
-                    <label htmlFor="bank_transfer" className="flex-1">
-                      Bank Transfer
-                    </label>
-                  </div>
+              <div className="space-y-4 pt-6 border-t font-medium">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>USD {subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tax (10%)</span>
+                  <span>USD {tax.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="h-px bg-border my-2" />
+                <div className="flex justify-between text-xl font-bold">
+                  <span>Grand Total</span>
+                  <span className="text-primary">USD {total.toLocaleString()}</span>
                 </div>
               </div>
 
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-black text-white hover:bg-gray-800 py-4 text-lg flex items-center justify-center gap-2"
+                className="w-full h-14 rounded-xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/10 transition-all active:scale-95"
               >
-                {loading ? (
-                  <>
-                    <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
-                    Processing...
-                  </>
-                ) : (
-                  "Complete Order"
-                )}
+                {loading ? "Processing..." : "Place Order"}
+                <ChevronRight className="w-5 h-5" />
               </Button>
-            </form>
-          </div>
-          {/* Order Summary */}
-          <div>
-            <div className="bg-gray-50 p-6 rounded">
-              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-              {/* List Items */}
-              <div className="space-y-4 mb-6">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="w-16 h-16 bg-white rounded overflow-hidden">
-                      <img
-                        src={item.product.image_url}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium text-sm">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        Qty: {item.quantity}
-                      </p>
-                      <p className="font-medium text-sm">
-                        USD{" "}
-                        {(item.product.price * item.quantity).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Summary Totals */}
-              <div className="border-t border-gray-200 pt-4 space-y-2 text-sm">
-                {/** Subtotal */}
-                <div className="flex justify-between">
-                  <span>Subtotal ({items.length} items)</span>
-                  <span>
-                    USD{" "}
-                    {items
-                      .reduce((acc, i) => acc + i.product.price * i.quantity, 0)
-                      .toLocaleString()}
-                  </span>
-                </div>
-
-                {/** Shipping */}
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>Free</span>
-                </div>
-
-                {/** Tax 10% */}
-                <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>
-                    USD{" "}
-                    {Math.round(
-                      items.reduce(
-                        (acc, i) => acc + i.product.price * i.quantity,
-                        0
-                      ) * 0.1
-                    ).toLocaleString()}
-                  </span>
-                </div>
-
-                {/** Total */}
-                <div className="border-t border-gray-200 pt-2">
-                  <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
-                    <span>
-                      USD{" "}
-                      {Math.round(
-                        items.reduce(
-                          (acc, i) => acc + i.product.price * i.quantity,
-                          0
-                        ) * 1.1
-                      ).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Info */}
-              <div className="mt-6 space-y-3 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4" />
-                  <span>Free shipping on all orders</span>
+              <div className="flex flex-col items-center gap-3 pt-2">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </aside>
+        </form>
       </div>
-    </div>
+    </main>
   );
 }

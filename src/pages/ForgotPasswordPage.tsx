@@ -4,8 +4,8 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { selectAuthError, selectAuthLoading } from "@/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Header } from "@/components/header";
 import { requestPasswordResetThunk } from "@/features/auth/authThunks";
+import { KeyRound, ArrowLeft, Send } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -26,50 +26,58 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen">
-      <Header />
-
-      <div className="flex items-center justify-center py-12 px-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-black mb-2">
-              Forgot Password
-            </h1>
-            <p className="text-gray-600">Enter your email to receive OTP</p>
+    <main className="min-h-[80vh] flex items-center justify-center py-12 px-4 transition-colors duration-300">
+      <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
+            <KeyRound className="w-8 h-8" />
           </div>
+          <h1 className="text-3xl font-bold tracking-tight">Forgot Password</h1>
+          <p className="text-muted-foreground">
+            We'll send a transmission to reset your access
+          </p>
+        </div>
 
+        <div className="bg-card border rounded-2xl p-8 shadow-xl shadow-primary/5 relative overflow-hidden">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <Input
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-semibold ml-1">Email Address</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="h-12 rounded-xl"
+                required
+              />
+            </div>
 
             {error && (
-              <p className="text-red-600 text-sm text-center">{error}</p>
+              <div className="text-destructive text-sm text-center bg-destructive/10 p-3 rounded-xl border border-destructive/20">
+                {error}
+              </div>
             )}
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black text-white"
+              className="w-full h-12 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              {isLoading ? "Sending OTP..." : "Send OTP"}
+              {isLoading ? "Sending..." : "Send Reset Code"}
+              <Send className="w-4 h-4 ml-1" />
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-8 pt-6 border-t text-center">
             <Link
               to="/auth/login"
-              className="text-sm text-gray-600 hover:text-black"
+              className="text-sm font-bold text-muted-foreground hover:text-primary transition-all flex items-center justify-center gap-2"
             >
-              Back to Sign In
+              <ArrowLeft className="w-4 h-4" /> Back to Sign In
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

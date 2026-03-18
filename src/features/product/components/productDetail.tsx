@@ -68,36 +68,36 @@ export function ProductDetail() {
   };
 
   return (
-    <div className="bg-white">
-      <div className="px-4 py-8">
+    <div className="bg-background min-h-screen animate-in fade-in duration-500">
+      <div className="px-4 py-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div className="bg-gray-100 aspect-square">
+          <div className="bg-muted aspect-square rounded-2xl overflow-hidden border border-border flex items-center justify-center p-8 group relative">
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <img
               src={product.image_url || "/placeholder.svg"}
-              alt={product.name}
-              className="w-full h-full object-cover"
+              alt={`${product.name} - Detailed View`}
+              decoding="async"
+              loading="eager"
+              className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out drop-shadow-2xl"
             />
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col justify-center">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-2">
                   {shortCodeFromUUID(product.id)}
                 </p>
-                <h1 className="text-2xl font-medium text-black mb-4">
+                <h1 className="text-2xl font-medium text-foreground mb-4">
                   {product.name}
                 </h1>
-                <p className="text-lg text-black">$ {product.price}.00</p>
+                <p className="text-lg text-foreground">$ {product.price}.00</p>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className={`hover:bg-gray-50 ${
-                  isBookmarked ? "text-red-500" : "text-black"
-                }`}
+                className={`hover:bg-gray-50 ${isBookmarked ? "text-red-500" : "text-foreground"
+                  }`}
                 onClick={handleHeartClick}
               >
                 <Heart
@@ -106,124 +106,124 @@ export function ProductDetail() {
               </Button>
             </div>
 
-            {/* Material */}
             <div className="flex items-center justify-between py-4 border-b border-gray-200">
-              <span className="text-black">Material</span>
+              <span className="text-foreground">Material</span>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button className="flex-1 bg-black text-white hover:bg-gray-800 py-4 rounded-full">
-                Contact Concierge Services
-              </Button>
+            <div className="flex gap-3 pt-6">
               <Button
                 onClick={handleAddToCart}
-                className="bg-black text-white hover:bg-gray-800 py-4 px-10 rounded-full flex items-center gap-2 cursor-pointer"
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02] transform transition-all active:scale-[0.98] py-6 text-lg rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer"
               >
                 <ShoppingBag className="w-5 h-5" />
                 <span>Add to Cart</span>
               </Button>
             </div>
 
-            {/* Digital Advisor */}
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-xl border border-border">
               <p>
                 Our Digital Advisor is available if you have any question on
                 this product.
               </p>
-              <button className="underline text-black">Contact us</button>
+              <button className="underline text-foreground">Contact us</button>
             </div>
 
-            {/* Product Description */}
             <div className="space-y-4">
-              <p className="text-gray-700 leading-relaxed">
-                {isExpanded
-                  ? product.description
-                  : `${product.description.substring(0, 200)}...`}
-              </p>
+              <div
+                className={`text-muted-foreground leading-relaxed relative overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? "max-h-[1000px]" : "max-h-[4.5rem]"}`}
+              >
+                <p>{product.description}</p>
+                {!isExpanded && (
+                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" />
+                )}
+              </div>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="underline text-black text-sm"
+                className="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
               >
                 {isExpanded ? "Read less" : "Read more"}
               </button>
             </div>
 
-            {/* Expandable Sections */}
             <div className="border-t border-gray-200 pt-6">
               <button
                 onClick={() => toggleSection("instore")}
                 className="flex items-center justify-between w-full text-left"
               >
-                <span className="text-black">In-Store Services</span>
+                <span className="text-foreground">In-Store Services</span>
                 {expandedSection === "instore" ? (
                   <Minus className="w-4 h-4 text-gray-400" />
                 ) : (
                   <Plus className="w-4 h-4 text-gray-400" />
                 )}
               </button>
-              {expandedSection === "instore" && (
-                <div className="mt-4 space-y-3 text-sm text-gray-600">
-                  <p>• Personal Shopping Appointment</p>
-                  <p>• Product Customization & Personalization</p>
-                  <p>• Repair & Maintenance Services</p>
-                  <p>• Gift Wrapping & Special Packaging</p>
-                  <p>• Style Consultation with Expert Advisors</p>
+              <div className={`grid transition-all duration-300 ease-in-out ${expandedSection === "instore" ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">
+                  <div className="space-y-3 text-sm text-muted-foreground pb-2">
+                    <p>• Personal Shopping Appointment</p>
+                    <p>• Product Customization & Personalization</p>
+                    <p>• Repair & Maintenance Services</p>
+                    <p>• Gift Wrapping & Special Packaging</p>
+                    <p>• Style Consultation with Expert Advisors</p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Delivery & Returns */}
             <div className="border-t border-gray-200 pt-6">
               <button
                 onClick={() => toggleSection("delivery")}
                 className="flex items-center justify-between w-full text-left"
               >
-                <span className="text-black">Delivery & Returns</span>
+                <span className="text-foreground">Delivery & Returns</span>
                 {expandedSection === "delivery" ? (
                   <Minus className="w-4 h-4 text-gray-400" />
                 ) : (
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 )}
               </button>
-              {expandedSection === "delivery" && (
-                <div className="mt-4 space-y-3 text-sm text-gray-600">
-                  <p>• Free standard delivery on all orders</p>
-                  <p>• Express delivery available (1-2 business days)</p>
-                  <p>• Same-day delivery in select cities</p>
-                  <p>• 30-day return policy</p>
-                  <p>• Free returns and exchanges</p>
-                  <p>• Track your order online</p>
+              <div className={`grid transition-all duration-300 ease-in-out ${expandedSection === "delivery" ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">
+                  <div className="space-y-3 text-sm text-muted-foreground pb-2">
+                    <p>• Free standard delivery on all orders</p>
+                    <p>• Express delivery available (1-2 business days)</p>
+                    <p>• Same-day delivery in select cities</p>
+                    <p>• 30-day return policy</p>
+                    <p>• Free returns and exchanges</p>
+                    <p>• Track your order online</p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Gifting */}
             <div className="border-t border-gray-200 pt-6">
               <button
                 onClick={() => toggleSection("gifting")}
                 className="flex items-center justify-between w-full text-left"
               >
-                <span className="text-black">Gifting</span>
+                <span className="text-foreground">Gifting</span>
                 {expandedSection === "gifting" ? (
                   <Minus className="w-4 h-4 text-gray-400" />
                 ) : (
                   <ChevronRight className="w-4 h-4 text-gray-400" />
                 )}
               </button>
-              {expandedSection === "gifting" && (
-                <div className="mt-4 space-y-3 text-sm text-gray-600">
-                  <p>• Complimentary gift wrapping</p>
-                  <p>• Personalized gift messages</p>
-                  <p>• Premium gift boxes and bags</p>
-                  <p>• Gift receipts (prices hidden)</p>
-                  <p>• Extended return period for gifts</p>
-                  <p>• Digital gift cards available</p>
+              <div className={`grid transition-all duration-300 ease-in-out ${expandedSection === "gifting" ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">
+                  <div className="space-y-3 text-sm text-muted-foreground pb-2">
+                    <p>• Complimentary gift wrapping</p>
+                    <p>• Personalized gift messages</p>
+                    <p>• Premium gift boxes and bags</p>
+                    <p>• Gift receipts (prices hidden)</p>
+                    <p>• Extended return period for gifts</p>
+                    <p>• Digital gift cards available</p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

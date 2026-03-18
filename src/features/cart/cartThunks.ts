@@ -111,18 +111,10 @@ export const deleteCartItem = createAsyncThunk<
   { rejectValue: string }
 >("cart/deleteItem", async ({ cart_id, item_id }, { rejectWithValue }) => {
   try {
-    const res = await fetch(`/api/v1/carts/${cart_id}/items/${item_id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    const res = await DELETE<StandardResponse<null>>(`/carts/${cart_id}/items/${item_id}`);
 
-    if (!res.ok) {
-      throw new Error(`Failed with status ${res.status}`);
-    }
-
-    const data: StandardResponse<null> = await res.json();
-    if (data.status !== "success") {
-      return rejectWithValue(data.message);
+    if (res.status !== "success") {
+      return rejectWithValue(res.message);
     }
 
     return { id: item_id };
