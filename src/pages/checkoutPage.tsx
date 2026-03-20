@@ -3,9 +3,9 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, CreditCard, Truck, ShieldCheck, ChevronRight, Check } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, ChevronRight } from "lucide-react";
 
-import { selectCartItems, resetCart } from "@/features/cart/cartSlice";
+import * as cartSlice from "@/features/cart/cartSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 import { createOrder } from "@/features/order/orderThunks";
 import type { OrderCreate } from "@/features/order/types/order";
@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const items = useAppSelector(selectCartItems);
+  const items = useAppSelector(cartSlice.selectCartItems);
   const { cart } = useAppSelector(s => s.cart)
   const { loading } = useAppSelector(s => s.order)
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -71,7 +71,7 @@ export default function CheckoutPage() {
         await dispatch(clearCart(cart.id)).unwrap();
       }
 
-      dispatch(resetCart());
+      dispatch(cartSlice.resetCart());
       navigate("/order-success");
     } catch (err: any) {
       alert("Failed to place order: " + (err.message || err));
