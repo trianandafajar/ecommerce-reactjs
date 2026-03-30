@@ -9,10 +9,18 @@ export default function MainLayout() {
   const location = useLocation();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  // Scroll to top whenever the route changes
+  // Scroll to top or to hash whenever the route or search query changes
   useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+    }
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+  }, [location.pathname, location.search, location.hash]);
   
   // Routes that should NOT have a footer
   const noFooterRoutes = ["/admin", "/auth"];

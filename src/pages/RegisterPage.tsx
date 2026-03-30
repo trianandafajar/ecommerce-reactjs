@@ -36,7 +36,7 @@ export default function RegisterPage() {
             <UserPlus className="w-8 h-8" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Create Account</h1>
-          <p className="text-muted-foreground">Join NeoKeys and start your typing journey</p>
+          <p className="text-muted-foreground">Join Keysthetix and start your typing journey</p>
         </div>
 
         <div className="bg-card border rounded-2xl p-8 shadow-xl shadow-primary/5 relative overflow-hidden">

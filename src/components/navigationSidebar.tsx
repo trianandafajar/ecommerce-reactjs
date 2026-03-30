@@ -32,7 +32,7 @@ export function NavigationSidebar({ isOpen, onClose }: NavigationSidebarProps) {
       <div className="w-80 bg-background h-full shadow-2xl shadow-primary/20 animate-in slide-in-from-left duration-500 ease-out z-50 border-r border-border">
         <div className="p-6 h-full overflow-y-auto">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold tracking-wider text-foreground">Neo Keys</h2>
+            <h2 className="text-2xl font-bold tracking-wider text-foreground">Keysthetix</h2>
             <Button
               variant="ghost"
               size="sm"

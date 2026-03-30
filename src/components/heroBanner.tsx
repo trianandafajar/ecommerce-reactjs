@@ -41,8 +41,8 @@ export function HeroBanner() {
   return (
     <div className="relative w-full overflow-hidden bg-background border-b border-border min-h-[500px] lg:min-h-[650px] transition-colors duration-500">
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-float z-0"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-cyan-400/10 rounded-full blur-[120px] animate-float-delayed z-0"></div>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[80px] sm:blur-[100px] animate-float z-0"></div>
+        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 sm:right-1/4 sm:translate-x-0 w-80 h-80 sm:w-[30rem] sm:h-[30rem] bg-cyan-400/10 rounded-full blur-[100px] sm:blur-[120px] animate-float-delayed z-0"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-transparent z-10"></div>
 
         <div
@@ -61,7 +61,7 @@ export function HeroBanner() {
         </div>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 flex flex-col items-start gap-6 h-full justify-center">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 flex flex-col items-center sm:items-start text-center sm:text-left gap-6 h-full justify-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium transition-all">
           <Zap className="w-4 h-4 fill-current animate-pulse" />
           <span key={`badge-${currentSlide}`} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -80,14 +80,14 @@ export function HeroBanner() {
           {slides[currentSlide].description}
         </p>
 
-        <div className="flex flex-wrap items-center gap-4 mt-6">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-6">
           <a href="#popular" className="inline-flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-medium cursor-pointer rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 duration-200">
             Shop Collection
             <ArrowRight className="ml-2 w-5 h-5" />
           </a>
         </div>
 
-        <div className="absolute bottom-8 left-4 sm:left-6 lg:left-8 flex gap-2">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 sm:left-6 lg:left-8 flex gap-2">
           {slides.map((_, index) => (
             <button
               key={index}

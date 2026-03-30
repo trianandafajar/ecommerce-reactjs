@@ -54,8 +54,8 @@ export default function HomePage() {
       <CategoryNav />
       
       <div id="popular" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-foreground capitalize">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+          <h2 className="text-3xl font-bold text-foreground capitalize text-center sm:text-left">
             {categoryFilter ? `${categoryFilter} Collection` : "Popular Products"}
           </h2>
           {categoryFilter ? (
