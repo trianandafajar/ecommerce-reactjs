@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Youtube, ArrowRight, MapPin, Phone, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { MapPin, Phone, Mail } from "lucide-react";
 
 export function Footer() {
   return (
