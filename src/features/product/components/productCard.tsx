@@ -46,14 +46,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           alt={`${product.name} - Premium Mechanical Keyboard Component`}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover group-hover:scale-110 group-hover:opacity-0 transition-all duration-700 absolute inset-0 z-10"
+          className="w-full h-full object-cover group-hover:scale-110 group-hover:opacity-0 transition-all duration-700 absolute inset-0 z-10 group-hover:rotate-6"
         />
         <img
-          src={`https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&auto=format&fit=crop`}
+          src={product.image_url || `https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&auto=format&fit=crop`}
           alt={`${product.name} Enthusiast Detail - Alt View`}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover scale-110 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all duration-700 absolute inset-0 z-0"
+          className="w-full h-full object-cover scale-100 group-hover:scale-110 opacity-0 group-hover:opacity-100 transition-all duration-700 absolute inset-0 z-0 group-hover:rotate-6"
         />
         <Button
           variant="ghost"

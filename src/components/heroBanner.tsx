@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowRight, Zap } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Zap, ArrowRight } from "lucide-react";
 
 const slides = [
   {
@@ -37,60 +37,92 @@ const slides = [
 export function HeroBanner() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const goToPreviousSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, []);
+
+  const goToNextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      goToNextSlide();
     }, 6000);
+
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden bg-background border-b border-border min-h-[500px] lg:min-h-[650px] transition-colors duration-500">
+    <div className="relative w-full overflow-hidden bg-background border-b border-border min-h-[500px] lg:min-h-[650px]">
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[80px] sm:blur-[100px] animate-float z-0"></div>
-        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 sm:right-1/4 sm:translate-x-0 w-80 h-80 sm:w-[30rem] sm:h-[30rem] bg-cyan-400/10 rounded-full blur-[100px] sm:blur-[120px] animate-float-delayed z-0"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-transparent z-10"></div>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[100px] animate-float"></div>
 
-        {slides.map((slide, index) => {
-          const isActive = index === currentSlide;
+        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 sm:right-1/4 sm:translate-x-0 w-80 h-80 sm:w-[30rem] sm:h-[30rem] bg-cyan-400/10 rounded-full blur-[120px] animate-float-delayed"></div>
 
-          return (
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent z-10"></div>
+
+        {/* slider container */}
+        <div
+          className="absolute inset-y-0 left-0 z-0 flex overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            width: `${slides.length * 100}%`,
+            transform: `translate3d(-${currentSlide * (100 / slides.length)}%,0,0)`,
+            willChange: "transform",
+          }}
+        >
+          {slides.map((slide) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-in-out z-0 ${
-                isActive ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
-              style={{ willChange: "opacity, transform" }}
-              aria-hidden={!isActive}
+              className="relative h-full flex-none overflow-hidden"
+              style={{ width: `${100 / slides.length}%` }}
             >
               <img
                 src={slide.image}
                 alt={slide.highlight}
-                className={`absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity dark:mix-blend-normal transition-transform duration-[6000ms] ease-out ${
-                  isActive ? "scale-105" : "scale-100"
-                }`}
+                loading={slide.id === 1 ? "eager" : "lazy"}
+                className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity dark:mix-blend-normal transition-transform duration-[7000ms] ease-out"
+                style={{
+                  transform:
+                    currentSlide === slide.id - 1 ? "scale(1.08)" : "scale(1)",
+                }}
               />
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
+      <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-30">
+        <button
+          onClick={goToPreviousSlide}
+          className="group pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300"
+        >
+          <ChevronLeft className="h-6 w-6 text-white transition-transform duration-200 group-hover:-translate-x-0.5" />
+        </button>
+
+        <button
+          onClick={goToNextSlide}
+          className="group pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300"
+        >
+          <ChevronRight className="h-6 w-6 text-white transition-transform duration-200 group-hover:translate-x-0.5" />
+        </button>
+      </div>
+
+      {/* Content */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 flex flex-col items-center sm:items-start text-center sm:text-left gap-6 h-full justify-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium transition-all">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
           <Zap className="w-4 h-4 fill-current animate-pulse" />
-          <span
-            key={`badge-${currentSlide}`}
-            className="animate-in fade-in slide-in-from-bottom-2 duration-500"
-          >
+          <span key={`badge-${currentSlide}`}>
             {slides[currentSlide].badge}
           </span>
         </div>
 
         <h1
           key={`title-${currentSlide}`}
-          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-700"
+          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500"
         >
-          {slides[currentSlide].title} <br />
+          {slides[currentSlide].title}
+          <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">
             {slides[currentSlide].highlight}
           </span>
@@ -98,7 +130,7 @@ export function HeroBanner() {
 
         <p
           key={`desc-${currentSlide}`}
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-2 leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-1000"
+          className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-2 leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-700"
         >
           {slides[currentSlide].description}
         </p>
@@ -113,17 +145,17 @@ export function HeroBanner() {
           </a>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 sm:left-6 lg:left-8 flex gap-2">
+        {/* Pagination */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 lg:left-8 flex gap-2">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+              className={`h-1.5 rounded-full transition-all duration-300 ${
                 currentSlide === index
                   ? "w-8 bg-primary"
                   : "w-4 bg-muted hover:bg-muted-foreground"
               }`}
-              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
