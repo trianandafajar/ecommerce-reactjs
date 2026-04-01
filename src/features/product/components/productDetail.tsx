@@ -7,7 +7,7 @@ import { selectIsBookmarked, addBookmark, removeBookmark } from "@/features/book
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 import { shortCodeFromUUID } from "../helper/product";
 import { selectCart } from "@/features/cart/cartSlice";
-import { addCartItem, createCart } from "@/features/cart/cartThunks";
+import { addCartItem, createCart, lookupCart } from "@/features/cart/cartThunks";
 
 export function ProductDetail() {
   const dispatch = useAppDispatch();
