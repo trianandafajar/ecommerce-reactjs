@@ -22,17 +22,19 @@ function AppContent() {
     dispatch(loadBookmarksFromStorage());
   }, [dispatch, products.length]);
 
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  
   useEffect(() => {
     const initializeUser = async () => {
       const token = Cookies.get("access_token");
-      if (token) {
+      if (token && isAuthenticated) {
         await dispatch(fetchCurrentUserThunk());
         dispatch(lookupCart({}));
       }
     };
 
     initializeUser();
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated]);
 
   return (
     <RouterProvider router={router} />

@@ -10,6 +10,7 @@ import {
   deleteCartItem,
   clearCart,
 } from "./cartThunks";
+import { logoutThunk } from "@/features/auth/authThunks";
 
 interface CartState {
   cart: Cart | null;
@@ -117,6 +118,13 @@ const cartSlice = createSlice({
   .addCase(clearCart.rejected, (state, action) => {
     state.error = action.payload || "Failed to clear cart";
   });
+
+    // 🚪 LOGOUT (Clear cart on logout)
+    builder.addCase(logoutThunk.fulfilled, (state) => {
+      state.cart = null;
+      state.items = [];
+      state.error = null;
+    });
   },
 });
 

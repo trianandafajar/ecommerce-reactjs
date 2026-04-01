@@ -10,7 +10,7 @@ export const fetchSessionCart = createAsyncThunk<
   { rejectValue: string }
 >("cart/fetchSession", async (cart_id, { rejectWithValue }) => {
   try {
-    const res = await GET<StandardResponse<Cart>>(`/carts/${cart_id}`);
+    const res = await GET<StandardResponse<Cart>>(`carts/${cart_id}`);
     if (res.status !== "success") {
       return rejectWithValue(res.message);
     }
@@ -29,7 +29,8 @@ export const createCart = createAsyncThunk<
 >("cart/createCart", async (_, { rejectWithValue }) => {
   try {
     const res = await POST<StandardResponse<Cart>>(
-      "/carts/",
+      "carts/",
+      {}
     );
 
     if (res.status !== "success") {
@@ -49,8 +50,8 @@ export const lookupCart = createAsyncThunk<
   { rejectValue: string }
 >("cart/lookupCart", async (payload, { rejectWithValue }) => {
   try {
-    const query = payload.session_id ? `session_id=${payload.session_id}` : "";
-    const res = await GET<StandardResponse<Cart>>(`/carts/lookup?${query}`);
+    const query = payload.session_id ? `?session_id=${payload.session_id}` : "";
+    const res = await GET<StandardResponse<Cart>>(`carts/lookup${query}`);
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);
@@ -71,7 +72,7 @@ export const addCartItem = createAsyncThunk<
   try {
     const res = await POST<
       StandardResponse<CartItem>
-    >(`/carts/${cart_id}/items`, { product_id, quantity });
+    >(`carts/${cart_id}/items`, { product_id, quantity });
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);
@@ -92,7 +93,7 @@ export const updateCartItem = createAsyncThunk<
   try {
     const res = await PUT<
       StandardResponse<CartItem>
-    >(`/carts/${cart_id}/items/${item_id}`, { quantity });
+    >(`carts/${cart_id}/items/${item_id}`, { quantity });
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);
@@ -111,7 +112,7 @@ export const deleteCartItem = createAsyncThunk<
   { rejectValue: string }
 >("cart/deleteItem", async ({ cart_id, item_id }, { rejectWithValue }) => {
   try {
-    const res = await DELETE<StandardResponse<null>>(`/carts/${cart_id}/items/${item_id}`);
+    const res = await DELETE<StandardResponse<null>>(`carts/${cart_id}/items/${item_id}`);
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);
@@ -132,7 +133,7 @@ export const clearCart = createAsyncThunk<
 >("cart/clearCart", async (cartId, { rejectWithValue }) => {
   try {
     const res = await DELETE<StandardResponse<{ deleted_cart_id: string }>>(
-      `/carts/${cartId}/items`
+      `carts/${cartId}/items`
     );
 
     if (res.status !== "success") {

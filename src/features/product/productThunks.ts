@@ -16,7 +16,7 @@ export const fetchProducts = createAsyncThunk<
   { rejectValue: string }
 >("product/getAll", async (payload, { rejectWithValue }) => {
   try {
-    const res = await GET<StandardResponse<Product[]>>("/products/", {
+    const res = await GET<StandardResponse<Product[]>>("products/", {
       params: { 
         page: payload.page, 
         per_page: payload.per_page,
@@ -52,7 +52,7 @@ export const createProduct = createAsyncThunk<
   { rejectValue: string }
 >("product/create", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<Product>>("/products/", payload);
+    const res = await POST<StandardResponse<Product>>("products/", payload);
     if (res.status !== "success") {
       return rejectWithValue(res.message);
     }
@@ -70,7 +70,7 @@ export const getDetailProduct = createAsyncThunk<
   { rejectValue: string }
 >("product/getDetail", async (productId, { rejectWithValue }) => {
   try {
-    const res = await GET<StandardResponse<Product>>(`/products/${productId}`);
+    const res = await GET<StandardResponse<Product>>(`products/${productId}`);
 
     if (res.status !== "success") {
       return rejectWithValue(res.message);

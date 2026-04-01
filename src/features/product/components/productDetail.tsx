@@ -36,11 +36,16 @@ export function ProductDetail() {
 
   if (!product) return <p>Loading...</p>;
 
+  const cartLoading = useAppSelector((state) => state.cart.loading);
+
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       navigate("/auth/login");
       return;
     }
+
+    // If the cart is already loading (e.g. from App initialization), wait a bit or ignore click
+    if (cartLoading) return;
 
     let cartId = cart?.id;
 
@@ -48,16 +53,23 @@ export function ProductDetail() {
       try {
         const newCart = await dispatch(createCart()).unwrap();
         cartId = newCart.id;
-      } catch (err) {
-        console.error("Failed to create cart:", err);
-        return;
+      } catch (err: any) {
+        // If createCart fails with 400, maybe the user already has a cart that wasn't found.
+        // Try looking up the cart one more time before giving up.
+        try {
+          const lookedUpCart = await dispatch(lookupCart({})).unwrap();
+          cartId = lookedUpCart.id;
+        } catch (lookupErr) {
+          console.error("Failed to create or lookup cart:", err);
+          return;
+        }
       }
     }
 
     try {
       await dispatch(
         addCartItem({
-          cart_id: cartId,
+          cart_id: cartId as string,
           product_id: product.id,
           quantity: 1,
         })

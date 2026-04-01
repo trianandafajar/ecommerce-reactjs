@@ -31,7 +31,7 @@ export const registerThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/register", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<User>>("/auth/register", payload);
+    const res = await POST<StandardResponse<User>>("auth/register", payload);
 
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.data;
@@ -47,7 +47,7 @@ export const loginThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/login", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<AuthResponse>>("/auth/login", payload);
+    const res = await POST<StandardResponse<AuthResponse>>("auth/login", payload);
 
     if (res.status !== "success") return rejectWithValue(res.message);
 
@@ -66,7 +66,7 @@ export const fetchCurrentUserThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
   try {
-    const res = await GET<StandardResponse<User>>("/auth/me");
+    const res = await GET<StandardResponse<User>>("auth/me");
 
     if (res.status !== "success") return rejectWithValue(res.message);
 
@@ -91,7 +91,7 @@ export const requestPasswordResetThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/requestReset", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<string>>("/auth/forgot-password", payload);
+    const res = await POST<StandardResponse<string>>("auth/forgot-password", payload);
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.message;
   } catch (err: any) {
@@ -105,7 +105,7 @@ export const verifyOtpThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/verifyOtp", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<string>>("/auth/verify-otp", payload);
+    const res = await POST<StandardResponse<string>>("auth/verify-otp", payload);
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.message;
   } catch (err: any) {
@@ -119,7 +119,7 @@ export const resetPasswordThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/resetPassword", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<string>>("/auth/reset-password", payload);
+    const res = await POST<StandardResponse<string>>("auth/reset-password", payload);
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.message;
   } catch (err: any) {
@@ -133,7 +133,7 @@ export const changePasswordThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/changePassword", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<string>>("/auth/change-password", payload);
+    const res = await POST<StandardResponse<string>>("auth/change-password", payload);
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.message;
   } catch (err: any) {
