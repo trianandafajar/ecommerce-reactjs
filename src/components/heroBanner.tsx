@@ -54,7 +54,7 @@ export function HeroBanner() {
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden bg-background border-b border-border min-h-[500px] lg:min-h-[650px]">
+    <div className="relative w-full h-[520px] sm:h-[600px] lg:h-[650px] overflow-hidden bg-background border-b border-border">
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[100px] animate-float"></div>
 
@@ -64,7 +64,7 @@ export function HeroBanner() {
 
         {/* slider container */}
         <div
-          className="absolute inset-y-0 left-0 z-0 flex overflow-hidden transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+          className="absolute inset-0 flex transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{
             width: `${slides.length * 100}%`,
             transform: `translate3d(-${currentSlide * (100 / slides.length)}%,0,0)`,
@@ -80,6 +80,8 @@ export function HeroBanner() {
               <img
                 src={slide.image}
                 alt={slide.highlight}
+                width="2000"
+                height="1200"
                 loading={slide.id === 1 ? "eager" : "lazy"}
                 className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity dark:mix-blend-normal transition-transform duration-[7000ms] ease-out"
                 style={{
@@ -130,7 +132,7 @@ export function HeroBanner() {
 
         <p
           key={`desc-${currentSlide}`}
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-2 leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-700"
+          className="text-lg md:text-xl text-muted-foreground max-w-2xl mt-2 leading-relaxed line-clamp-3 animate-in fade-in slide-in-from-bottom-6 duration-700"
         >
           {slides[currentSlide].description}
         </p>
