@@ -1,11 +1,6 @@
-// src/features/product/productSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Product } from "./types/product";
-import {
-  fetchProducts,
-  createProduct,
-  getDetailProduct,
-} from "./productThunks";
+import { fetchProducts, createProduct, getDetailProduct } from "./productThunks";
 import type { PaginationMeta } from "@/types/api";
 
 interface ProductState {
@@ -27,7 +22,7 @@ const initialState: ProductState = {
     total: 0,
     has_next: false,
     has_prev: false,
-    pages: 0
+    pages: 0,
   },
 };
 
@@ -41,6 +36,11 @@ const productSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    setSelected(state, action: PayloadAction<Product>) {
+      state.selectedProduct = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     // fetchProducts
@@ -49,7 +49,9 @@ const productSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProducts.fulfilled,(state, action: PayloadAction<{ items: Product[]; pagination: PaginationMeta }>) => {
+      .addCase(
+        fetchProducts.fulfilled,
+        (state, action: PayloadAction<{ items: Product[]; pagination: PaginationMeta }>) => {
           state.loading = false;
           const { items, pagination } = action.payload;
           if (pagination.page === 1) {
@@ -57,9 +59,7 @@ const productSlice = createSlice({
           } else {
             state.items = [...state.items, ...items];
           }
-
           state.pagination = pagination;
-          
         }
       )
       .addCase(fetchProducts.rejected, (state, action) => {
@@ -73,13 +73,10 @@ const productSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        createProduct.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.loading = false;
-          state.items.push(action.payload);
-        }
-      )
+      .addCase(createProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.loading = false;
+        state.items.push(action.payload);
+      })
       .addCase(createProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to create product";
@@ -92,13 +89,10 @@ const productSlice = createSlice({
         state.error = null;
         state.selectedProduct = null;
       })
-      .addCase(
-        getDetailProduct.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.loading = false;
-          state.selectedProduct = action.payload;
-        }
-      )
+      .addCase(getDetailProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
       .addCase(getDetailProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch product detail";
@@ -107,6 +101,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearSelectedProduct, clearError } = productSlice.actions;
-
+export const { clearSelectedProduct, clearError, setSelected } = productSlice.actions;
 export default productSlice.reducer;

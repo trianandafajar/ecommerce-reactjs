@@ -35,7 +35,8 @@ const slides = [
 ];
 
 export function HeroBanner() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0); 
+  const [isPaused, setIsPaused] = useState(false);
 
   const goToPreviousSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
@@ -46,23 +47,30 @@ export function HeroBanner() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      goToNextSlide();
-    }, 6000);
-
+    if (isPaused) return;
+    const timer = setInterval(goToNextSlide, 6000);
     return () => clearInterval(timer);
+  }, [goToNextSlide, isPaused]);
+
+  useEffect(() => {
+    const handleVisibility = () => setIsPaused(document.hidden);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   return (
-    <div className="relative w-full h-[520px] sm:h-[600px] lg:h-[650px] overflow-hidden bg-background border-b border-border">
+    <section
+      className="relative w-full h-[520px] sm:h-[600px] lg:h-[650px] overflow-hidden bg-background border-b border-border"
+      aria-label="Featured products banner"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[100px] animate-float"></div>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[100px] animate-float" />
+        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 sm:right-1/4 sm:translate-x-0 w-80 h-80 sm:w-[30rem] sm:h-[30rem] bg-cyan-400/10 rounded-full blur-[120px] animate-float-delayed" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent z-10" />
 
-        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 sm:right-1/4 sm:translate-x-0 w-80 h-80 sm:w-[30rem] sm:h-[30rem] bg-cyan-400/10 rounded-full blur-[120px] animate-float-delayed"></div>
-
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent z-10"></div>
-
-        {/* slider container */}
         <div
           className="absolute inset-0 flex transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{
@@ -71,7 +79,7 @@ export function HeroBanner() {
             willChange: "transform",
           }}
         >
-          {slides.map((slide) => (
+          {slides.map((slide, index) => (
             <div
               key={slide.id}
               className="relative h-full flex-none overflow-hidden"
@@ -80,13 +88,15 @@ export function HeroBanner() {
               <img
                 src={slide.image}
                 alt={slide.highlight}
-                width="2000"
-                height="1200"
-                loading={slide.id === 1 ? "eager" : "lazy"}
+                width={2000}
+                height={1200}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "low"}
+                decoding={index === 0 ? "sync" : "async"}
                 className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity dark:mix-blend-normal transition-transform duration-[7000ms] ease-out"
                 style={{
                   transform:
-                    currentSlide === slide.id - 1 ? "scale(1.08)" : "scale(1)",
+                    currentSlide === index ? "scale(1.08)" : "scale(1)",
                 }}
               />
             </div>
@@ -97,13 +107,14 @@ export function HeroBanner() {
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-30">
         <button
           onClick={goToPreviousSlide}
+          aria-label="Previous slide"
           className="group pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300"
         >
           <ChevronLeft className="h-6 w-6 text-white transition-transform duration-200 group-hover:-translate-x-0.5" />
         </button>
-
         <button
           onClick={goToNextSlide}
+          aria-label="Next slide"
           className="group pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300"
         >
           <ChevronRight className="h-6 w-6 text-white transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -147,12 +158,13 @@ export function HeroBanner() {
           </a>
         </div>
 
-        {/* Pagination */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 lg:left-8 flex gap-2">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={currentSlide === index}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 currentSlide === index
                   ? "w-8 bg-primary"
@@ -162,6 +174,6 @@ export function HeroBanner() {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

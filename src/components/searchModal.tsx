@@ -27,18 +27,27 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   const limitedSuggestions = useMemo(
     () => suggestions.slice(0, 8),
-    [suggestions]
+    [suggestions],
   );
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 0);
+      requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [isOpen]);
 
   useEffect(() => {
     setHighlightedIndex(-1);
   }, [limitedSuggestions]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => { document.body.style.overflow = "" }
+  }, [isOpen])
 
   useEffect(() => {
     if (debounceRef.current) {
@@ -68,11 +77,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           page: 1,
           per_page: 12,
           ...(q.trim() ? { search: q } : {}),
-        })
+        }),
       );
       onClose();
     },
-    [dispatch, onClose]
+    [dispatch, onClose],
   );
 
   const handleKeyDown = useCallback(
@@ -128,7 +137,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       runMainSearchAndClose,
       searchQuery,
       onClose,
-    ]
+    ],
   );
 
   const handleClickSuggestion = useCallback(
@@ -138,7 +147,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       dispatch(setQuery(chosen));
       runMainSearchAndClose(chosen);
     },
-    [limitedSuggestions, dispatch, runMainSearchAndClose]
+    [limitedSuggestions, dispatch, runMainSearchAndClose],
   );
 
   const handleBackdropMouseDown = useCallback(
@@ -148,7 +157,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         runMainSearchAndClose(searchQuery);
       }
     },
-    [onClose, searchQuery, runMainSearchAndClose]
+    [onClose, searchQuery, runMainSearchAndClose],
   );
 
   const handleClearAndClose = useCallback(() => {
@@ -222,7 +231,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     role="option"
                     aria-selected={isHighlighted}
                     className={`text-base p-4 cursor-pointer rounded-xl transition-all duration-200 flex items-center gap-3 ${
-                      isHighlighted ? "bg-primary/10 text-primary border border-primary/20" : "hover:bg-muted text-foreground border border-transparent"
+                      isHighlighted
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "hover:bg-muted text-foreground border border-transparent"
                     }`}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                     onMouseLeave={() => setHighlightedIndex(-1)}
@@ -231,7 +242,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       handleClickSuggestion(idx);
                     }}
                   >
-                    <Search className={`w-4 h-4 ${isHighlighted ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <Search
+                      className={`w-4 h-4 ${isHighlighted ? "text-primary" : "text-muted-foreground"}`}
+                    />
                     {item}
                   </div>
                 );
