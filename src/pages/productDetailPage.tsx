@@ -1,9 +1,10 @@
 import { useAppSelector } from "@/app/hooks";
 import { ProductDetail } from "@/features/product/components/productDetail";
+import { selectSelectedProduct } from "@/features/product/productSlice";
 import SEO from "@/components/SEO";
 
 export default function ProductPage() {
-  const product = useAppSelector((state) => state.product.selectedProduct);
+  const product = useAppSelector(selectSelectedProduct);
 
   return (
     <>

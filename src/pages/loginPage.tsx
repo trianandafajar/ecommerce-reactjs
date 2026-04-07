@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { loginThunk } from "@/features/auth/authThunks";
+import { fetchCurrentUserThunk, loginThunk } from "@/features/auth/authThunks";
 import {
   selectAuthError,
   selectAuthLoading,
@@ -24,6 +24,7 @@ export default function LoginPage() {
     const result = await dispatch(loginThunk({ email, password }));
 
     if (loginThunk.fulfilled.match(result)) {
+      dispatch(fetchCurrentUserThunk());
       navigate("/"); 
     }
   };

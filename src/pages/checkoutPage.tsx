@@ -72,7 +72,7 @@ export default function CheckoutPage() {
       }
 
       dispatch(cartSlice.resetCart());
-      navigate("/order-success");
+      navigate("/");
     } catch (err: any) {
       alert("Failed to place order: " + (err.message || err));
     }

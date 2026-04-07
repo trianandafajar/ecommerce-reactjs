@@ -8,6 +8,7 @@ import { selectIsAuthenticated } from "@/features/auth/authSlice"
 import { shortCodeFromUUID } from "../helper/product"
 import { selectCart } from "@/features/cart/cartSlice"
 import { addCartItem, createCart, lookupCart } from "@/features/cart/cartThunks"
+import { selectSelectedProduct } from "../productSlice"
 
 function AccordionItem({
   id,
@@ -57,7 +58,7 @@ export function ProductDetail() {
 
   const cart = useAppSelector(selectCart)
   const cartLoading = useAppSelector((state) => state.cart.loading)
-  const product = useAppSelector((state) => state.product.selectedProduct)
+  const product = useAppSelector(selectSelectedProduct)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
 
   const isBookmarked = useAppSelector(selectIsBookmarked(product?.id ?? ""))

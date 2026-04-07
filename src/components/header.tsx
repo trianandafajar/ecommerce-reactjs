@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { memo, useState, useEffect, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { Menu, Search, User, ShoppingBag, LogOut, Plus, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -6,10 +6,24 @@ import { NavigationSidebar } from "@/components/navigationSidebar"
 import { SearchModal } from "@/components/searchModal"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { selectBookmarkCount } from "@/features/bookmark/bookmarkSlice"
-import { selectCartItems } from "@/features/cart/cartSlice"
+import { selectCartItemCount } from "@/features/cart/cartSlice"
 import { selectIsAuthenticated, selectUser } from "@/features/auth/authSlice"
 import { logoutThunk } from "@/features/auth/authThunks"
 import { selectSearchQuery } from "@/features/search/searchSlice"
+
+const SearchButtonLabel = memo(function SearchButtonLabel() {
+  const searchQuery = useAppSelector(selectSearchQuery)
+
+  if (!searchQuery.trim()) {
+    return <span className="text-sm hidden sm:inline">Search</span>
+  }
+
+  return (
+    <span className="text-sm hidden sm:inline">
+      {searchQuery.length > 20 ? `${searchQuery.slice(0, 20)}...` : searchQuery}
+    </span>
+  )
+})
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -36,11 +50,9 @@ export function Header() {
 
   const dispatch = useAppDispatch()
   const bookmarkCount = useAppSelector(selectBookmarkCount)
-  const cartItems = useAppSelector(selectCartItems)
-  const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
+  const cartItemCount = useAppSelector(selectCartItemCount)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const user = useAppSelector(selectUser)
-  const searchQuery = useAppSelector(selectSearchQuery)
 
   const handleUserClick = useCallback(() => {
     if (isAuthenticated) {
@@ -49,13 +61,6 @@ export function Header() {
       window.location.href = "/auth/login"
     }
   }, [isAuthenticated, dispatch])
-
-  const searchLabel =
-    searchQuery.trim()
-      ? searchQuery.length > 20
-        ? searchQuery.slice(0, 20) + "..."
-        : searchQuery
-      : "Search"
 
   return (
     <>
@@ -98,14 +103,14 @@ export function Header() {
               className="flex items-center gap-1 sm:gap-2 text-foreground hover:bg-accent hover:text-accent-foreground px-1 sm:px-3 cursor-pointer"
             >
               <Search className="w-4 h-4" aria-hidden="true" />
-              <span className="text-sm hidden sm:inline">{searchLabel}</span>
+              <SearchButtonLabel />
             </Button>
           </div>
 
           <div className="flex-shrink-0">
             <Link
               to="/"
-              aria-label="Keysthetix — Home"
+              aria-label="Keysthetix Home"
               className="cursor-pointer hover:opacity-80 transition-opacity"
             >
               <span className="text-lg sm:text-2xl font-bold tracking-tighter sm:tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-primary animate-gradient-x">
@@ -114,7 +119,6 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Kanan */}
           <div className="flex-1 flex items-center justify-end gap-1 sm:gap-3">
             <Button
               variant="ghost"
