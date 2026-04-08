@@ -46,7 +46,17 @@ const cartSlice = createSlice({
       .addCase(fetchSessionCart.fulfilled, (state, action) => {
         state.loading = false;
         state.cart = action.payload;
-        state.items = action.payload.items;
+        // Merge duplicates if backend returns them
+        const mergedItems: CartItem[] = [];
+        action.payload.items.forEach(item => {
+          const existing = mergedItems.find(i => i.product_id === item.product_id);
+          if (existing) {
+            existing.quantity += item.quantity;
+          } else {
+            mergedItems.push({ ...item });
+          }
+        });
+        state.items = mergedItems;
       })
       .addCase(fetchSessionCart.rejected, (state, action) => {
         state.loading = false;
@@ -78,7 +88,18 @@ const cartSlice = createSlice({
       .addCase(lookupCart.fulfilled, (state, action) => {
         state.loading = false;
         state.cart = action.payload;
-        state.items = action.payload.items;
+        
+        // Merge duplicates if backend returns them
+        const mergedItems: CartItem[] = [];
+        action.payload.items.forEach(item => {
+          const existing = mergedItems.find(i => i.product_id === item.product_id);
+          if (existing) {
+            existing.quantity += item.quantity;
+          } else {
+            mergedItems.push({ ...item });
+          }
+        });
+        state.items = mergedItems;
       })
       .addCase(lookupCart.rejected, (state, action) => {
         state.loading = false;
@@ -87,9 +108,14 @@ const cartSlice = createSlice({
 
     // ➕ ADD ITEM
     builder.addCase(addCartItem.fulfilled, (state, action) => {
-      const existing = state.items.find((i) => i.id === action.payload.id);
+      const existing = state.items.find((i) => i.product_id === action.payload.product_id);
       if (existing) {
+        // If backend returns the total quantity for this item record, use it.
+        // If it returns just the added quantity, add it. 
+        // Based on typical backend behavior for "add item", it usually returns 
+        // the single record that was updated or created.
         existing.quantity = action.payload.quantity;
+        existing.id = action.payload.id; // Sync ID in case it changed
       } else {
         state.items.push(action.payload);
       }

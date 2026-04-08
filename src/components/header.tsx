@@ -172,8 +172,8 @@ export function Header() {
                 ? <LogOut className="w-4 h-4" aria-hidden="true" />
                 : <User className="w-4 h-4" aria-hidden="true" />
               }
-              <span className="text-xs hidden sm:inline">
-                {isAuthenticated ? user?.name : "Login"}
+              <span className="text-xs font-semibold sm:inline">
+                {isAuthenticated ? (user?.name || "User") : "Login"}
               </span>
             </Button>
           </div>

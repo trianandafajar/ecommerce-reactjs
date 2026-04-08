@@ -19,8 +19,35 @@ export default function RegisterPage() {
   const isLoading = useAppSelector(selectAuthLoading);
   const error = useAppSelector(selectAuthError);
 
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const validate = () => {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedName) return "Full name is required";
+    if (trimmedName.length < 3) return "Name must be at least 3 characters";
+
+    if (!trimmedEmail) return "Email address is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) return "Invalid email address format";
+
+    if (!trimmedPassword) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters";
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLocalError(null);
+
+    const validationMsg = validate();
+    if (validationMsg) {
+      setLocalError(validationMsg);
+      return;
+    }
 
     const result = await dispatch(registerThunk({ name, email, phone, password }));
     if (registerThunk.fulfilled.match(result)) {
@@ -86,9 +113,9 @@ export default function RegisterPage() {
               />
             </div>
 
-            {error && (
+            {(error || localError) && (
               <div className="text-destructive text-sm text-center bg-destructive/10 p-3 rounded-xl border border-destructive/20">
-                {error}
+                {error || localError}
               </div>
             )}
 

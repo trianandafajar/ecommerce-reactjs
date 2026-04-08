@@ -18,13 +18,37 @@ export default function LoginPage() {
   const isLoading = useAppSelector(selectAuthLoading);
   const error = useAppSelector(selectAuthError);
 
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const validate = () => {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail) return "Email is required";
+    if (!trimmedPassword) return "Password is required";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) return "Invalid email format";
+
+    if (password.length < 6) return "Password must be at least 6 characters";
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLocalError(null);
+
+    const validationMsg = validate();
+    if (validationMsg) {
+      setLocalError(validationMsg);
+      return;
+    }
 
     const result = await dispatch(loginThunk({ email, password }));
 
     if (loginThunk.fulfilled.match(result)) {
-      dispatch(fetchCurrentUserThunk());
+      await dispatch(fetchCurrentUserThunk());
       navigate("/"); 
     }
   };
@@ -76,9 +100,9 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
+          {(error || localError) && (
             <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded">
-              {error}
+              {error || localError}
             </div>
           )}
 

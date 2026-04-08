@@ -32,6 +32,9 @@ export default function CheckoutPage() {
     paymentMethod: "cod",
   });
 
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/auth/login");
@@ -42,10 +45,26 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    if (!formData.address.trim()) return "Address is required";
+    if (!formData.firstName.trim()) return "First name is required";
+    if (!formData.lastName.trim()) return "Last name is required";
+    if (!formData.city.trim()) return "City is required";
+    if (!formData.postalCode.trim()) return "Postal code is required";
+    if (!formData.phone.trim()) return "Phone number is required";
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (items.length === 0) return;
+
+    const validationError = validateForm();
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
 
     const orderItems = items.map((item) => ({
       product_id: item.product.id,
@@ -65,14 +84,15 @@ export default function CheckoutPage() {
     };
 
     try {
-      await dispatch(createOrder(payload)).unwrap();
+      const result = await dispatch(createOrder(payload)).unwrap();
+      setOrderId(result.id);
 
       if (cart?.id) {
         await dispatch(clearCart(cart.id)).unwrap();
       }
 
       dispatch(cartSlice.resetCart());
-      navigate("/");
+      setIsSuccess(true);
     } catch (err: any) {
       alert("Failed to place order: " + (err.message || err));
     }
@@ -83,6 +103,35 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-background flex items-center justify-center text-foreground">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <main className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-8 animate-in zoom-in duration-500">
+          <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 scale-110">
+            <CreditCard className="w-12 h-12" />
+          </div>
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight">Order Confirmed!</h1>
+            <p className="text-muted-foreground text-lg">
+              Thank you for your purchase. Your order <span className="text-foreground font-mono font-bold">#{orderId?.slice(0, 8)}</span> is being processed.
+            </p>
+          </div>
+          <div className="pt-8 flex flex-col gap-4">
+            <Button 
+              onClick={() => navigate("/")}
+              className="w-full h-14 rounded-xl text-lg font-bold"
+            >
+              Return to Shop
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              A confirmation email has been sent to your registered address.
+            </p>
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -121,6 +170,7 @@ export default function CheckoutPage() {
                     placeholder="Enter your first name"
                     value={formData.firstName}
                     onChange={handleInputChange}
+                    required
                     className="h-12 rounded-xl"
                   />
                 </div>
@@ -132,6 +182,7 @@ export default function CheckoutPage() {
                     placeholder="Enter your last name"
                     value={formData.lastName}
                     onChange={handleInputChange}
+                    required
                     className="h-12 rounded-xl"
                   />
                 </div>
@@ -155,6 +206,7 @@ export default function CheckoutPage() {
                     placeholder="City name"
                     value={formData.city}
                     onChange={handleInputChange}
+                    required
                     className="h-12 rounded-xl"
                   />
                 </div>
@@ -166,6 +218,7 @@ export default function CheckoutPage() {
                     placeholder="Postal code"
                     value={formData.postalCode}
                     onChange={handleInputChange}
+                    required
                     className="h-12 rounded-xl"
                   />
                 </div>
@@ -177,6 +230,7 @@ export default function CheckoutPage() {
                     placeholder="Your contact number"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    required
                     className="h-12 rounded-xl"
                   />
                 </div>
