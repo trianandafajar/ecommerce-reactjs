@@ -39,7 +39,7 @@ export function CategoryNav() {
             {categories.map((category) => (
               <li key={category.name}>
                 <Link
-                  to={`/?category=${category.name.toLowerCase()}`}
+                  to={`/products?category=${category.name.toLowerCase()}`}
                   className="group relative flex flex-col items-center justify-center p-6 rounded-3xl border border-border bg-card hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500"
                 >
                   <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-500 ease-out">

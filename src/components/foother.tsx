@@ -96,8 +96,8 @@ export function Footer() {
                     to={item.to}
                     className="text-sm font-medium text-muted-foreground hover:text-foreground hover:-translate-x-1 transition-all duration-200 flex items-center justify-start md:justify-end gap-2 group"
                   >
-                    {item.name}
                     <div className="w-1 h-1 bg-primary scale-0 group-hover:scale-100 transition-transform rounded-full" aria-hidden="true" />
+                    {item.name}
                   </Link>
                 </li>
               ))}

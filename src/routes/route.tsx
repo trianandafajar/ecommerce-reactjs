@@ -13,6 +13,7 @@ const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const VerifyOtpPage = lazy(() => import("@/pages/VerifyOtpPage"));
 const CreateProductPage = lazy(() => import("@/pages/CreateProductPage"));
+const ProductsPage = lazy(() => import("@/pages/ProductsPage"));
 
 import { productDetailLoader } from "@/routes/productLoader";
 import ProtectedRoute from "@/routes/ProtectedRoute";
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
           {
             path: "/",
             element: <HomePage />,
+          },
+          {
+            path: "/products",
+            element: <ProductsPage />,
           },
           {
             path: "/admin/product/create",

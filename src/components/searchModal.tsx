@@ -7,9 +7,10 @@ import {
   selectSearchQuery,
   selectSearchResults,
   selectSearchLoading,
+  clearQuery,
 } from "@/features/search/searchSlice";
 import { fetchSearchSuggestions } from "@/features/search/searchThunks";
-import { fetchProducts } from "@/features/product/productThunks";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const debounceRef = useRef<number | null>(null);
+  const navigate = useNavigate();
 
   const limitedSuggestions = useMemo(
     () => suggestions.slice(0, 8),
@@ -72,16 +74,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   const runMainSearchAndClose = useCallback(
     (q: string) => {
-      dispatch(
-        fetchProducts({
-          page: 1,
-          per_page: 12,
-          ...(q.trim() ? { search: q } : {}),
-        }),
-      );
+      if (q.trim()) {
+        navigate(`/products?search=${encodeURIComponent(q.trim())}`);
+      } else {
+        navigate('/products');
+      }
       onClose();
     },
-    [dispatch, onClose],
+    [navigate, onClose],
   );
 
   const handleKeyDown = useCallback(
@@ -160,11 +160,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     [onClose, searchQuery, runMainSearchAndClose],
   );
 
-  const handleClearAndClose = useCallback(() => {
-    dispatch(setQuery(""));
-    runMainSearchAndClose("");
-    onClose();
-  }, [dispatch, onClose, runMainSearchAndClose]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleClearSearch = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(clearQuery());
+    searchParams.delete('search');
+    setSearchParams(searchParams);
+  };
 
   if (!isOpen) return null;
 
@@ -197,15 +200,17 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 : undefined
             }
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClearAndClose}
-            className="mr-3 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer rounded-full h-10 w-10 p-0 flex items-center justify-center transition-colors"
-            aria-label="Clear search"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          {searchQuery.trim() !== "" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearSearch}
+              className="mr-3 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer rounded-full h-10 w-10 p-0 flex items-center justify-center transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          )}
         </div>
 
         <div className="p-4 bg-card">
@@ -230,11 +235,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     key={item + "-" + idx}
                     role="option"
                     aria-selected={isHighlighted}
-                    className={`text-base p-4 cursor-pointer rounded-xl transition-all duration-200 flex items-center gap-3 ${
-                      isHighlighted
-                        ? "bg-primary/10 text-primary border border-primary/20"
-                        : "hover:bg-muted text-foreground border border-transparent"
-                    }`}
+                    className={`text-base p-4 cursor-pointer rounded-xl transition-all duration-200 flex items-center gap-3 ${isHighlighted
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "hover:bg-muted text-foreground border border-transparent"
+                      }`}
                     onMouseEnter={() => setHighlightedIndex(idx)}
                     onMouseLeave={() => setHighlightedIndex(-1)}
                     onMouseDown={(e) => {

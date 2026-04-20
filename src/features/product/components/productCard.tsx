@@ -143,7 +143,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
             <Button
               size="icon"
               variant="secondary"
-              className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 relative"
+              className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 relative cursor-pointer hover:scale-110 active:scale-95 shadow-md hover:shadow-primary/50 transition-all duration-300"
               onClick={handleCartClick}
             >
               <ShoppingCart className="w-4 h-4" />

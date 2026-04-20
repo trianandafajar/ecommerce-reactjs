@@ -137,14 +137,14 @@ export function HeroBanner() {
         <button
           onClick={goToPreviousSlide}
           aria-label="Previous slide"
-          className="group pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300"
+          className="group pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300 cursor-pointer"
         >
           <ChevronLeft className="h-6 w-6 text-white transition-transform duration-200 group-hover:-translate-x-0.5" />
         </button>
         <button
           onClick={goToNextSlide}
           aria-label="Next slide"
-          className="group pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300"
+          className="group pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300 cursor-pointer"
         >
           <ChevronRight className="h-6 w-6 text-white transition-transform duration-200 group-hover:translate-x-0.5" />
         </button>
@@ -193,11 +193,10 @@ export function HeroBanner() {
               onClick={() => setCurrentSlide(index)}
               aria-label={`Go to slide ${index + 1}`}
               aria-current={currentSlide === index}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                currentSlide === index
+              className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === index
                   ? "w-8 bg-primary"
                   : "w-4 bg-muted hover:bg-muted-foreground"
-              }`}
+                }`}
             />
           ))}
         </div>
