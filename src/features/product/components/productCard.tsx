@@ -115,12 +115,30 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
         />
         <Button
           variant="ghost"
-          size="sm"
-          className={`absolute top-4 right-4 hover:bg-background/80 !rounded-none cursor-pointer z-20 ${isBookmarked ? "text-red-500" : "text-foreground"
-            }`}
+          size="icon"
+          className="
+            absolute top-3 right-3 z-30
+            h-9 w-9
+            rounded-full
+            bg-black/25
+            backdrop-blur-md
+            border border-white/20
+            hover:bg-black/40
+            transition-all duration-300
+            cursor-pointer
+            shadow-lg
+          "
           onClick={handleHeartClick}
         >
-          <Heart className={`w-4 h-4 ${isBookmarked ? "fill-current" : ""}`} />
+          <Heart
+            className={`
+              w-4 h-4
+              text-white
+              drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]
+              transition-all duration-300
+              ${isBookmarked ? "fill-red-500 text-red-500 scale-110" : ""}
+            `}
+          />
         </Button>
       </div>
       <div className="p-4">

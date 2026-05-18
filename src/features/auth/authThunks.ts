@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { GET, POST } from "@/lib/api";
 import Cookies from "js-cookie";
 import type { StandardResponse } from "@/types/api";
+import { lookupCart } from "../cart/cartThunks";
 
 interface LoginArgs {
   email: string;
@@ -45,13 +46,15 @@ export const loginThunk = createAsyncThunk<
   AuthResponse,
   LoginArgs,
   { rejectValue: string }
->("auth/login", async (payload, { rejectWithValue }) => {
+>("auth/login", async (payload, { rejectWithValue, dispatch }) => {
   try {
     const res = await POST<StandardResponse<AuthResponse>>("auth/login", payload);
-
+    
     if (res.status !== "success") return rejectWithValue(res.message);
 
     Cookies.set("access_token", res.data.access_token, { path: "/" });
+
+    dispatch(lookupCart({}))
 
     return res.data;
   } catch (err: any) {
