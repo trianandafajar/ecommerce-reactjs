@@ -12,15 +12,17 @@ import {
   changePasswordThunk,
 } from "@/features/auth/authThunks";
 
-interface User {
+export interface AuthUser {
   id: string;
   name: string;
   email: string;
   phone?: string;
+  role?: "admin" | "customer";
+  is_active?: boolean;
 }
 
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
   loading: boolean;
@@ -47,13 +49,12 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // REGISTER
       .addCase(registerThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
       })
-      .addCase(registerThunk.fulfilled, (state, action: PayloadAction<User>) => {
+      .addCase(registerThunk.fulfilled, (state, action: PayloadAction<AuthUser>) => {
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = false;
@@ -63,33 +64,30 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload || "Registration failed";
       })
-
-      // LOGIN
       .addCase(loginThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
       })
-      .addCase(loginThunk.fulfilled, (state) => {
+      .addCase(loginThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
-        state.isInitialized = true; 
+        state.isInitialized = true;
+        state.user = action.payload.user ?? state.user;
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed";
       })
-
-      // FETCH CURRENT USER
       .addCase(fetchCurrentUserThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCurrentUserThunk.fulfilled, (state, action: PayloadAction<User>) => {
+      .addCase(fetchCurrentUserThunk.fulfilled, (state, action: PayloadAction<AuthUser>) => {
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
-        state.isInitialized = true; 
+        state.isInitialized = true;
       })
       .addCase(fetchCurrentUserThunk.rejected, (state, action) => {
         state.loading = false;
@@ -98,14 +96,11 @@ const authSlice = createSlice({
         state.isInitialized = true;
         state.user = null;
       })
-
-      // LOGOUT
       .addCase(logoutThunk.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
+        state.isInitialized = true;
       })
-
-      // REQUEST RESET PASSWORD
       .addCase(requestPasswordResetThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -119,8 +114,6 @@ const authSlice = createSlice({
         state.error = action.payload || "Failed to request reset";
         state.loading = false;
       })
-
-      // VERIFY OTP
       .addCase(verifyOtpThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -134,8 +127,6 @@ const authSlice = createSlice({
         state.error = action.payload || "OTP verification failed";
         state.loading = false;
       })
-
-      // RESET PASSWORD
       .addCase(resetPasswordThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -149,8 +140,6 @@ const authSlice = createSlice({
         state.error = action.payload || "Password reset failed";
         state.loading = false;
       })
-
-      // CHANGE PASSWORD
       .addCase(changePasswordThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -170,11 +159,12 @@ const authSlice = createSlice({
 export const { setInitialized } = authSlice.actions;
 export default authSlice.reducer;
 
-// SELECTORS
 export const selectAuth = (state: RootState) => state.auth;
 export const selectUser = (state: RootState) => state.auth.user;
+export const selectUserRole = (state: RootState) => state.auth.user?.role;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
-export const selectIsInitialized = (state: RootState) => state.auth.isInitialized; // ✅
+export const selectIsInitialized = (state: RootState) => state.auth.isInitialized;
 export const selectAuthLoading = (state: RootState) => state.auth.loading;
 export const selectAuthError = (state: RootState) => state.auth.error;
 export const selectAuthMessage = (state: RootState) => state.auth.message;
+export const selectIsAdmin = (state: RootState) => state.auth.user?.role === "admin";

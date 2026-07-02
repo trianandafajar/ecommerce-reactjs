@@ -3,36 +3,34 @@ import { GET, POST } from "@/lib/api";
 import Cookies from "js-cookie";
 import type { StandardResponse } from "@/types/api";
 import { lookupCart } from "../cart/cartThunks";
+import type { AuthUser } from "./authSlice";
 
 interface LoginArgs {
   email: string;
   password: string;
 }
+
 interface RegisterArgs {
   name: string;
   email: string;
   phone?: string;
   password: string;
 }
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-}
+
 interface AuthResponse {
   access_token: string;
   token_type: string;
+  role?: "admin" | "customer";
+  user?: AuthUser;
 }
 
-// REGISTER
 export const registerThunk = createAsyncThunk<
-  User,
+  AuthUser,
   RegisterArgs,
   { rejectValue: string }
 >("auth/register", async (payload, { rejectWithValue }) => {
   try {
-    const res = await POST<StandardResponse<User>>("auth/register", payload);
+    const res = await POST<StandardResponse<AuthUser>>("auth/register", payload);
 
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.data;
@@ -41,7 +39,6 @@ export const registerThunk = createAsyncThunk<
   }
 });
 
-// LOGIN
 export const loginThunk = createAsyncThunk<
   AuthResponse,
   LoginArgs,
@@ -49,12 +46,11 @@ export const loginThunk = createAsyncThunk<
 >("auth/login", async (payload, { rejectWithValue, dispatch }) => {
   try {
     const res = await POST<StandardResponse<AuthResponse>>("auth/login", payload);
-    
+
     if (res.status !== "success") return rejectWithValue(res.message);
 
     Cookies.set("access_token", res.data.access_token, { path: "/" });
-
-    dispatch(lookupCart({}))
+    dispatch(lookupCart({}));
 
     return res.data;
   } catch (err: any) {
@@ -62,14 +58,13 @@ export const loginThunk = createAsyncThunk<
   }
 });
 
-// GET CURRENT USER
 export const fetchCurrentUserThunk = createAsyncThunk<
-  User,
+  AuthUser,
   void,
   { rejectValue: string }
 >("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
   try {
-    const res = await GET<StandardResponse<User>>("auth/me");
+    const res = await GET<StandardResponse<AuthUser>>("auth/me");
 
     if (res.status !== "success") return rejectWithValue(res.message);
 
@@ -79,14 +74,10 @@ export const fetchCurrentUserThunk = createAsyncThunk<
   }
 });
 
-
-// LOGOUT
 export const logoutThunk = createAsyncThunk("auth/logout", async () => {
   Cookies.remove("access_token", { path: "/" });
   return true;
 });
-
-// ----------------- PASSWORD RESET FLOW -----------------
 
 export const requestPasswordResetThunk = createAsyncThunk<
   string,

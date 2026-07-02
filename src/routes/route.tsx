@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 const HomePage = lazy(() => import("@/pages/homePage"));
@@ -14,10 +14,17 @@ const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const VerifyOtpPage = lazy(() => import("@/pages/VerifyOtpPage"));
 const CreateProductPage = lazy(() => import("@/pages/CreateProductPage"));
 const ProductsPage = lazy(() => import("@/pages/ProductsPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const AdminOverviewPage = lazy(() => import("@/pages/admin/AdminOverviewPage"));
+const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"));
+const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"));
+const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"));
+const AdminReportsPage = lazy(() => import("@/pages/admin/AdminReportsPage"));
 
 import { productDetailLoader } from "@/routes/productLoader";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicRoute from "@/routes/PublicRoute";
+import AdminRoute from "@/routes/AdminRoute";
 import MainLayout from "@/components/MainLayout";
 
 const LoadingScreen = () => (
@@ -46,10 +53,6 @@ export const router = createBrowserRouter([
             element: <ProductsPage />,
           },
           {
-            path: "/admin/product/create",
-            element: <CreateProductPage />,
-          },
-          {
             element: <PublicRoute />,
             children: [
               { path: "/auth/login", element: <LoginPage /> },
@@ -70,6 +73,20 @@ export const router = createBrowserRouter([
               { path: "/cart", element: <CartPage /> },
               { path: "/checkout", element: <CheckoutPage /> },
               { path: "/bookmarks", element: <BookmarksPage /> },
+              { path: "/profile", element: <ProfilePage /> },
+            ],
+          },
+          {
+            path: "/admin",
+            element: <AdminRoute />,
+            children: [
+              { index: true, element: <Navigate to="dashboard" replace /> },
+              { path: "dashboard", element: <AdminOverviewPage /> },
+              { path: "orders", element: <AdminOrdersPage /> },
+              { path: "customers", element: <AdminCustomersPage /> },
+              { path: "products", element: <AdminProductsPage /> },
+              { path: "reports", element: <AdminReportsPage /> },
+              { path: "product/create", element: <CreateProductPage /> },
             ],
           },
           {

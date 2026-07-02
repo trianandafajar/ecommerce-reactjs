@@ -6,10 +6,11 @@ import { useAppSelector } from "@/app/hooks";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 
 const NO_FOOTER_ROUTES = ["/admin", "/auth"];
+const NO_HEADER_ROUTES = ["/admin"];
 const PROTECTED_ROUTES = ["/cart", "/checkout", "/bookmarks"];
 
 export default function MainLayout() {
-  const { hash } = useLocation();
+  const { hash, pathname } = useLocation();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const scrollToLocation = useCallback(() => {
@@ -31,17 +32,15 @@ export default function MainLayout() {
     scrollToLocation();
   }, [scrollToLocation]);
 
-  const isNoFooterPath = NO_FOOTER_ROUTES.some((path) =>
-    location.pathname.startsWith(path),
-  );
-  const isProtectedAndNotAuth =
-    PROTECTED_ROUTES.includes(location.pathname) && !isAuthenticated;
+  const isNoFooterPath = NO_FOOTER_ROUTES.some((path) => pathname.startsWith(path));
+  const isNoHeaderPath = NO_HEADER_ROUTES.some((path) => pathname.startsWith(path));
+  const isProtectedAndNotAuth = PROTECTED_ROUTES.includes(pathname) && !isAuthenticated;
 
   const hideFooter = isNoFooterPath || isProtectedAndNotAuth;
 
   return (
     <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
-      <Header />
+      {!isNoHeaderPath && <Header />}
       <main className="flex-grow" id="main-content">
         <Outlet />
       </main>

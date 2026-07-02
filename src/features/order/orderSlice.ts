@@ -1,5 +1,6 @@
 // src/features/order/orderSlice.ts
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "@/app/store";
 import type { Order } from "./types/order";
 import {
   createOrder,
@@ -93,3 +94,10 @@ const orderSlice = createSlice({
 });
 
 export default orderSlice.reducer;
+
+const selectOrderState = (state: RootState) => state.order;
+
+export const selectOrders = createSelector([selectOrderState], (order) => order.orders);
+export const selectOrderLoading = createSelector([selectOrderState], (order) => order.loading);
+export const selectOrderError = createSelector([selectOrderState], (order) => order.error);
+export const selectSelectedOrder = createSelector([selectOrderState], (order) => order.selectedOrder);

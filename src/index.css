@@ -102,6 +102,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+    --color-brand-25: #f2f7ff;
+  --color-brand-50: #ecf3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #c2d6ff;
+  --color-brand-300: #9cb9ff;
+  --color-brand-400: #7592ff;
+  --color-brand-500: #465fff;
+  --color-brand-600: #3641f5;
+  --color-brand-700: #2a31d8;
+  --color-brand-800: #252dae;
+  --color-brand-900: #262e89;
+  --color-brand-950: #161950;
 
   --animate-float: float 10s infinite ease-in-out;
   --animate-float-delayed: float 12s infinite ease-in-out -5s;
@@ -142,3 +154,92 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility menu-item {
+  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-sm;
+}
+
+@utility menu-item-active {
+  @apply bg-[#00A9AA]/10 text-[#00A9AA] dark:bg-[#00A9AA]/15 dark:text-[#00A9AA];
+}
+
+@utility menu-item-inactive {
+  @apply text-white hover:bg-white/5 group-hover:text-white dark:text-white dark:hover:bg-white/5 dark:hover:text-white;
+}
+
+@utility menu-item-icon {
+  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
+}
+
+@utility menu-item-icon-active {
+  @apply text-[#00A9AA] dark:text-[#00A9AA];
+}
+
+@utility menu-item-icon-inactive {
+  @apply text-white/70 group-hover:text-white dark:text-white/70 dark:group-hover:text-white;
+}
+
+@utility menu-item-arrow {
+  @apply relative;
+}
+
+@utility menu-item-arrow-active {
+  @apply rotate-180 text-[#00A9AA] dark:text-[#00A9AA];
+}
+
+@utility menu-item-arrow-inactive {
+  @apply text-white/70 group-hover:text-white dark:text-white/70 dark:group-hover:text-white;
+}
+
+@utility menu-dropdown-item {
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium;
+}
+
+@utility menu-dropdown-item-active {
+  @apply bg-[#00A9AA]/10 text-[#00A9AA] dark:bg-[#00A9AA]/15 dark:text-[#00A9AA];
+}
+
+@utility menu-dropdown-item-inactive {
+  @apply text-white hover:bg-white/5 dark:text-white dark:hover:bg-white/5;
+}
+
+@utility menu-dropdown-badge {
+  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-[#00A9AA] dark:text-[#00A9AA];
+}
+
+@utility menu-dropdown-badge-active {
+  @apply bg-[#00A9AA]/15 dark:bg-[#00A9AA]/20;
+}
+
+@utility menu-dropdown-badge-inactive {
+  @apply bg-[#00A9AA]/10 group-hover:bg-[#00A9AA]/15 dark:bg-[#00A9AA]/10 dark:group-hover:bg-[#00A9AA]/20;
+}
+
+@utility no-scrollbar {
+  /* Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    @apply size-1.5;
+  }
+
+  &::-webkit-scrollbar-track {
+    @apply rounded-full;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full dark:bg-gray-700;
+  }
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #344054;
+}
+
+
