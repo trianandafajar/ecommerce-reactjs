@@ -51,6 +51,21 @@ export const fetchOrder = createAsyncThunk<
   }
 });
 
+// Fetch single admin order
+export const fetchAdminOrder = createAsyncThunk<
+  Order,
+  string,
+  { rejectValue: string }
+>("order/fetchAdminOne", async (orderId, { rejectWithValue }) => {
+  try {
+    const res = await GET<StandardResponse<Order>>(`/admin/orders/${orderId}`);
+    if (res.status !== "success") return rejectWithValue(res.message);
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(err.message || "Failed to fetch order detail");
+  }
+});
+
 // Update order status
 export const updateOrderStatus = createAsyncThunk<
   Order,
@@ -62,6 +77,23 @@ export const updateOrderStatus = createAsyncThunk<
       `${API_URL}/${orderId}/status`,
       { status }
     );
+    if (res.status !== "success") return rejectWithValue(res.message);
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(err.message || "Failed to update order status");
+  }
+});
+
+// Update admin order status
+export const updateAdminOrderStatus = createAsyncThunk<
+  Order,
+  { orderId: string; status: OrderUpdateStatus["status"] },
+  { rejectValue: string }
+>("order/updateAdminStatus", async ({ orderId, status }, { rejectWithValue }) => {
+  try {
+    const res = await PUT<StandardResponse<Order>>(`/admin/orders/${orderId}/status`, {
+      status,
+    });
     if (res.status !== "success") return rejectWithValue(res.message);
     return res.data;
   } catch (err: any) {

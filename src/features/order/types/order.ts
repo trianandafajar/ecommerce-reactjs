@@ -6,6 +6,12 @@ export interface OrderItem {
   product_id: string;
   quantity: number;
   price: Decimal;
+  product?: {
+    id: string;
+    name: string;
+    price: Decimal;
+    image_url?: string | null;
+  } | null;
 }
 
 // create order item

@@ -147,6 +147,9 @@
   * {
     @apply border-border outline-ring/50;
   }
+  button {
+    @apply cursor-pointer disabled:cursor-not-allowed;
+  }
   html {
     scroll-behavior: smooth;
   }

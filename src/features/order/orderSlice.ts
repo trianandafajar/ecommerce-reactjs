@@ -6,7 +6,9 @@ import {
   createOrder,
   fetchOrders,
   fetchOrder,
+  fetchAdminOrder,
   updateOrderStatus,
+  updateAdminOrderStatus,
   deleteOrder,
 } from "./orderThunks";
 
@@ -74,8 +76,31 @@ const orderSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Fetch admin single order
+    builder
+      .addCase(fetchAdminOrder.pending, (state) => {
+        state.loading = true;
+        state.error = undefined;
+      })
+      .addCase(fetchAdminOrder.fulfilled, (state, action: PayloadAction<Order>) => {
+        state.loading = false;
+        state.selectedOrder = action.payload;
+      })
+      .addCase(fetchAdminOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
     // Update order status
     builder.addCase(updateOrderStatus.fulfilled, (state, action: PayloadAction<Order>) => {
+      const index = state.orders.findIndex((o) => o.id === action.payload.id);
+      if (index !== -1) state.orders[index] = action.payload;
+      if (state.selectedOrder?.id === action.payload.id) {
+        state.selectedOrder = action.payload;
+      }
+    });
+
+    builder.addCase(updateAdminOrderStatus.fulfilled, (state, action: PayloadAction<Order>) => {
       const index = state.orders.findIndex((o) => o.id === action.payload.id);
       if (index !== -1) state.orders[index] = action.payload;
       if (state.selectedOrder?.id === action.payload.id) {

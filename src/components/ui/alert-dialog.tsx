@@ -79,7 +79,7 @@ function AlertDialogContent({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100000] flex items-center justify-center p-4"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
@@ -92,7 +92,7 @@ function AlertDialogContent({
         role="alertdialog"
         aria-modal="true"
         className={cn(
-          "relative z-10 w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/50",
+          "relative z-[100001] w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/50",
           className
         )}
       >

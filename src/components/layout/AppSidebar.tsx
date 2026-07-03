@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <CalendarHeartIcon />,
-    name: "Orders",
+    name: "Order Management",
     path: "/admin/orders",
   },
   {
@@ -49,12 +49,9 @@ const navItems: NavItem[] = [
     path: "/admin/customers",
   },
   {
-    name: "Products",
     icon: <TableIcon />,
-    subItems: [
-      { name: "Product List", path: "/admin/products", pro: false },
-      { name: "Order Tracking", path: "/admin/orders", pro: false },
-    ],
+    name: "Product List",
+    path: "/admin/products",
   },
 ];
 
