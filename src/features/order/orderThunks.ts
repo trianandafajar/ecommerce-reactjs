@@ -1,15 +1,15 @@
 // src/features/order/orderThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Order, OrderCreate, OrderUpdateStatus } from "./types/order";
-import type { StandardResponse } from "@/types/api";
+import type { PaginationMeta, StandardResponse } from "@/types/api";
 import { GET, POST, PUT, DELETE } from "@/lib/api";
 
 const CUSTOMER_API_URL = "/orders";
 const ADMIN_API_URL = "/admin/orders";
 
 export interface AdminOrderFilters {
-  skip?: number;
-  limit?: number;
+  page?: number;
+  per_page?: number;
   status_value?: Order["status"] | "all";
   customer_id?: string;
   start_date?: string;
@@ -49,15 +49,15 @@ export const fetchOrders = createAsyncThunk<
 
 // Fetch all admin orders with filters
 export const fetchAdminOrders = createAsyncThunk<
-  Order[],
+  { items: Order[]; pagination: PaginationMeta },
   AdminOrderFilters | void,
   { rejectValue: string }
 >("order/fetchAdminAll", async (filters, { rejectWithValue }) => {
   try {
     const res = await GET<StandardResponse<Order[]>>(ADMIN_API_URL, {
       params: {
-        skip: filters?.skip ?? 0,
-        limit: filters?.limit ?? 100,
+        page: filters?.page ?? 1,
+        per_page: filters?.per_page ?? 10,
         status_value: filters?.status_value && filters.status_value !== "all"
           ? filters.status_value
           : undefined,
@@ -68,7 +68,23 @@ export const fetchAdminOrders = createAsyncThunk<
       },
     });
     if (res.status !== "success") return rejectWithValue(res.message);
-    return res.data;
+    const meta = res.metadata?.pagination as
+      | (PaginationMeta & { total_pages?: number })
+      | undefined;
+    return {
+      items: res.data,
+      pagination: {
+        page: meta?.page ?? filters?.page ?? 1,
+        per_page: meta?.per_page ?? filters?.per_page ?? 10,
+        total: meta?.total ?? res.data.length,
+        pages:
+          meta?.pages ??
+          meta?.total_pages ??
+          (res.data.length > 0 ? Math.ceil(res.data.length / (filters?.per_page ?? 10)) : 0),
+        has_next: meta?.has_next ?? false,
+        has_prev: meta?.has_prev ?? false,
+      },
+    };
   } catch (err: any) {
     return rejectWithValue(err.message || "Failed to fetch orders");
   }

@@ -17,6 +17,7 @@ export default function CreateProductPage() {
   const [formData, setFormData] = useState<Omit<Product, "id" | "created_at" | "updated_at">>({
     name: "",
     description: "",
+    category: "",
     price: 0,
     image_url: "",
   });
@@ -80,6 +81,18 @@ export default function CreateProductPage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="category" className="text-foreground">Category</Label>
+              <Input
+                id="category"
+                name="category"
+                value={formData.category ?? ""}
+                onChange={handleChange}
+                placeholder="Enter product category"
+                className="bg-background border-border focus-visible:ring-primary"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="price" className="text-foreground">Price (USD)</Label>
               <Input
                 id="price"
@@ -99,7 +112,7 @@ export default function CreateProductPage() {
                 id="image_url"
                 name="image_url"
                 type="url"
-                value={formData.image_url}
+                value={formData.image_url ?? ""}
                 onChange={handleChange}
                 placeholder="https://example.com/image.png"
                 className="bg-background border-border focus-visible:ring-primary"

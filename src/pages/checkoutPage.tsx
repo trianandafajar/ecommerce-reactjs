@@ -289,7 +289,7 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-16 h-16 bg-muted rounded-xl overflow-hidden flex-shrink-0">
-                      <img src={item.product.image_url} alt="" className="w-full h-full object-cover" />
+                      <img src={item.product.image_url ?? "/placeholder.svg"} alt="" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-bold truncate">{item.product.name}</h4>

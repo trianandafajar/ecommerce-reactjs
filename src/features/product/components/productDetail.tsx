@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { selectIsBookmarked, addBookmark, removeBookmark } from "@/features/bookmark/bookmarkSlice"
 import { selectIsAuthenticated } from "@/features/auth/authSlice"
 import { shortCodeFromUUID } from "../helper/product"
+import { formatMarkdown } from "../helper/markdown"
 import { selectCart } from "@/features/cart/cartSlice"
 import { addCartItem, createCart, lookupCart } from "@/features/cart/cartThunks"
 import { selectSelectedProduct } from "../productSlice"
@@ -193,11 +194,16 @@ export function ProductDetail() {
 
             <div className="space-y-4">
               <div
-                className={`text-muted-foreground leading-relaxed relative overflow-hidden transition-all duration-500 ease-in-out ${
+                className={`relative overflow-hidden leading-relaxed transition-all duration-500 ease-in-out ${
                   isExpanded ? "max-h-[1000px]" : "max-h-[4.5rem]"
                 }`}
               >
-                <p>{product.description}</p>
+                <div
+                  className="space-y-3 text-sm text-muted-foreground"
+                  dangerouslySetInnerHTML={{
+                    __html: formatMarkdown(product.description),
+                  }}
+                />
                 {!isExpanded && (
                   <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" />
                 )}

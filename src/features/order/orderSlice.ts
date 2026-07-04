@@ -2,6 +2,7 @@
 import { createSelector, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/app/store";
 import type { Order } from "./types/order";
+import type { PaginationMeta } from "@/types/api";
 import {
   createOrder,
   fetchOrders,
@@ -18,6 +19,7 @@ interface OrderState {
   selectedOrder?: Order;
   loading: boolean;
   error?: string;
+  pagination: PaginationMeta;
 }
 
 const initialState: OrderState = {
@@ -25,6 +27,14 @@ const initialState: OrderState = {
   selectedOrder: undefined,
   loading: false,
   error: undefined,
+  pagination: {
+    page: 1,
+    per_page: 10,
+    total: 0,
+    pages: 0,
+    has_next: false,
+    has_prev: false,
+  },
 };
 
 const orderSlice = createSlice({
@@ -68,9 +78,10 @@ const orderSlice = createSlice({
         state.loading = true;
         state.error = undefined;
       })
-      .addCase(fetchAdminOrders.fulfilled, (state, action: PayloadAction<Order[]>) => {
+      .addCase(fetchAdminOrders.fulfilled, (state, action: PayloadAction<{ items: Order[]; pagination: PaginationMeta }>) => {
         state.loading = false;
-        state.orders = action.payload;
+        state.orders = action.payload.items;
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchAdminOrders.rejected, (state, action) => {
         state.loading = false;
@@ -142,3 +153,4 @@ export const selectOrders = createSelector([selectOrderState], (order) => order.
 export const selectOrderLoading = createSelector([selectOrderState], (order) => order.loading);
 export const selectOrderError = createSelector([selectOrderState], (order) => order.error);
 export const selectSelectedOrder = createSelector([selectOrderState], (order) => order.selectedOrder);
+export const selectOrderPagination = createSelector([selectOrderState], (order) => order.pagination);

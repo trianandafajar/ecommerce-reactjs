@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { ArrowUpRight, Filter, X } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,6 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +33,7 @@ import { fetchAdminOrders } from "@/features/order/orderThunks";
 import {
   selectOrderError,
   selectOrderLoading,
+  selectOrderPagination,
   selectOrders,
 } from "@/features/order/orderSlice";
 import { cn } from "@/lib/utils";
@@ -47,21 +58,10 @@ type DisplayOrder = {
 };
 
 type OrderFilter = "all" | DisplayOrder["status"];
-type OrderFilters = {
-  status: OrderFilter;
-  customerId: string;
-  startDate: string;
-  endDate: string;
-};
-
 type DetailAction = "approve" | "reject" | null;
 
-const initialFilters: OrderFilters = {
-  status: "all",
-  customerId: "all",
-  startDate: "",
-  endDate: "",
-};
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 10;
 
 const statusClass: Record<DisplayOrder["status"], string> = {
   pending: "bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20",
@@ -95,6 +95,36 @@ function formatOrderTime(createdAt: string) {
   if (minutes < 60) return `${minutes} min ago`;
   if (hours < 24) return `${hours} hr ago`;
   return `${days} day${days > 1 ? "s" : ""} ago`;
+}
+
+function buildPaginationItems(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const items: Array<number | "ellipsis"> = [1];
+  const left = Math.max(2, currentPage - 1);
+  const right = Math.min(totalPages - 1, currentPage + 1);
+
+  if (left > 2) {
+    items.push("ellipsis");
+  }
+
+  for (let page = left; page <= right; page += 1) {
+    items.push(page);
+  }
+
+  if (right < totalPages - 1) {
+    items.push("ellipsis");
+  }
+
+  items.push(totalPages);
+  return items;
+}
+
+function parsePositiveInt(value: string | null, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
 function getCustomerName(order: Order) {
@@ -242,19 +272,28 @@ function DetailSkeleton() {
 
 export default function AdminOrdersPage(): JSX.Element {
   const dispatch = useAppDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
   const liveOrders = useAppSelector(selectOrders);
   const loading = useAppSelector(selectOrderLoading);
   const error = useAppSelector(selectOrderError);
+  const pagination = useAppSelector(selectOrderPagination);
   const [hasRequested, setHasRequested] = useState(false);
   const [customers, setCustomers] = useState<ApiCustomer[]>([]);
   const [customersLoading, setCustomersLoading] = useState(false);
   const [customersError, setCustomersError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [draftFilters, setDraftFilters] =
-    useState<OrderFilters>(initialFilters);
-  const [activeFilters, setActiveFilters] =
-    useState<OrderFilters>(initialFilters);
+  const page = parsePositiveInt(searchParams.get("page"), DEFAULT_PAGE);
+  const perPage = parsePositiveInt(searchParams.get("per_page"), DEFAULT_PER_PAGE);
+  const activeFilters = useMemo(
+    () => ({
+      status: (searchParams.get("status") ?? "all") as OrderFilter,
+      customerId: searchParams.get("customer_id") ?? "all",
+      startDate: searchParams.get("start_date") ?? "",
+      endDate: searchParams.get("end_date") ?? "",
+    }),
+    [searchParams],
+  );
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [orderDetail, setOrderDetail] = useState<Order | null>(null);
@@ -307,19 +346,53 @@ export default function AdminOrdersPage(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+    let changed = false;
+
+    if (!searchParams.get("page")) {
+      nextParams.set("page", String(DEFAULT_PAGE));
+      changed = true;
+    }
+
+    if (!searchParams.get("per_page")) {
+      nextParams.set("per_page", String(DEFAULT_PER_PAGE));
+      changed = true;
+    }
+
+    if (changed) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    setSearchInput(searchParams.get("search") ?? "");
+  }, [searchParams]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       setDebouncedSearch(searchInput.trim());
+      const nextSearch = searchInput.trim();
+      updateSearchParams(
+        {
+          search: nextSearch || null,
+          page: DEFAULT_PAGE,
+          per_page: perPage,
+        },
+        { replace: true },
+      );
     }, 400);
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [searchInput]);
+  }, [searchInput, perPage]);
 
   useEffect(() => {
     setHasRequested(true);
     void dispatch(
       fetchAdminOrders({
+        page,
+        per_page: perPage,
         status_value:
           activeFilters.status === "all" ? undefined : activeFilters.status,
         customer_id:
@@ -329,10 +402,9 @@ export default function AdminOrdersPage(): JSX.Element {
         start_date: activeFilters.startDate || undefined,
         end_date: activeFilters.endDate || undefined,
         search: debouncedSearch || undefined,
-        limit: 200,
       }),
     );
-  }, [dispatch, activeFilters, debouncedSearch]);
+  }, [dispatch, activeFilters, debouncedSearch, page, perPage]);
 
   useEffect(() => {
     if (!orderDialogOpen || !selectedOrderId) return;
@@ -442,6 +514,8 @@ export default function AdminOrdersPage(): JSX.Element {
   const refreshOrders = async () => {
     await dispatch(
       fetchAdminOrders({
+        page,
+        per_page: perPage,
         status_value:
           activeFilters.status === "all" ? undefined : activeFilters.status,
         customer_id:
@@ -451,16 +525,73 @@ export default function AdminOrdersPage(): JSX.Element {
         start_date: activeFilters.startDate || undefined,
         end_date: activeFilters.endDate || undefined,
         search: debouncedSearch || undefined,
-        limit: 200,
       }),
     );
   };
 
+  const updateSearchParams = (
+    next: Record<string, string | number | null | undefined>,
+    options?: { replace?: boolean },
+  ) => {
+    const params = new URLSearchParams(searchParams);
+
+    Object.entries(next).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    });
+
+    if (!params.get("page")) {
+      params.set("page", String(DEFAULT_PAGE));
+    }
+
+    if (!params.get("per_page")) {
+      params.set("per_page", String(perPage));
+    }
+
+    setSearchParams(params, options);
+  };
+
   const resetFilters = () => {
-    setDraftFilters(initialFilters);
-    setActiveFilters(initialFilters);
     setSearchInput("");
     setDebouncedSearch("");
+    updateSearchParams(
+      {
+        page: DEFAULT_PAGE,
+        per_page: perPage,
+        search: null,
+        status: null,
+        customer_id: null,
+        start_date: null,
+        end_date: null,
+      },
+      { replace: false },
+    );
+  };
+
+  const performOrderAction = async (
+    orderId: string,
+    nextStatus: "paid" | "cancelled",
+    options?: { closeDialog?: boolean },
+  ) => {
+    const actionPath = nextStatus === "paid" ? "approve" : "reject";
+    const response = await POST<StandardResponse<Order>>(
+      `/admin/orders/${orderId}/${actionPath}`,
+    );
+
+    if (response.status !== "success") {
+      throw new Error(response.message || "Failed to update order");
+    }
+
+    if (options?.closeDialog) {
+      closeOrderDialog();
+    } else if (selectedOrderId === orderId) {
+      setOrderDetail(response.data);
+    }
+
+    await refreshOrders();
   };
 
   const handleOrderAction = async (nextStatus: "paid" | "cancelled") => {
@@ -469,17 +600,7 @@ export default function AdminOrdersPage(): JSX.Element {
     setDetailAction(nextStatus === "paid" ? "approve" : "reject");
 
     try {
-      const actionPath = nextStatus === "paid" ? "approve" : "reject";
-      const response = await POST<StandardResponse<Order>>(
-        `/admin/orders/${selectedOrderId}/${actionPath}`,
-      );
-
-      if (response.status !== "success") {
-        throw new Error(response.message || "Failed to update order");
-      }
-
-      setOrderDetail(response.data);
-      await refreshOrders();
+      await performOrderAction(selectedOrderId, nextStatus, { closeDialog: true });
     } catch (updateError) {
       setDetailError(
         updateError instanceof Error
@@ -488,6 +609,21 @@ export default function AdminOrdersPage(): JSX.Element {
       );
     } finally {
       setDetailAction(null);
+    }
+  };
+
+  const handleQuickOrderAction = async (
+    orderId: string,
+    nextStatus: "paid" | "cancelled",
+  ) => {
+    try {
+      await performOrderAction(orderId, nextStatus);
+    } catch (updateError) {
+      setDetailError(
+        updateError instanceof Error
+          ? updateError.message
+          : "Failed to update order",
+      );
     }
   };
 
@@ -551,7 +687,9 @@ export default function AdminOrdersPage(): JSX.Element {
               <div className="relative">
                 <Input
                   value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
+                  onChange={(event) => {
+                    setSearchInput(event.target.value);
+                  }}
                   placeholder="Order ID, customer, address, city, phone..."
                   className="h-11 min-h-11 border-slate-700 bg-[#0b1322] pr-10 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
                 />
@@ -561,7 +699,11 @@ export default function AdminOrdersPage(): JSX.Element {
                     variant="ghost"
                     size="sm"
                     className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full text-slate-400 hover:bg-white/5 hover:text-white"
-                    onClick={() => setSearchInput("")}
+                    onClick={() => {
+                      setSearchInput("");
+                      setDebouncedSearch("");
+                      updateSearchParams({ search: null, page: DEFAULT_PAGE }, { replace: true });
+                    }}
                     aria-label="Clear search"
                   >
                     <X className="h-4 w-4" />
@@ -575,13 +717,12 @@ export default function AdminOrdersPage(): JSX.Element {
                 Status
               </label>
               <Select
-                value={draftFilters.status}
+                value={activeFilters.status}
                 onValueChange={(value) =>
-                  setDraftFilters((prev) => {
-                    const next = { ...prev, status: value as OrderFilter };
-                    setActiveFilters(next);
-                    return next;
-                  })
+                  updateSearchParams(
+                    { status: value === "all" ? null : value, page: DEFAULT_PAGE },
+                    { replace: true },
+                  )
                 }
               >
                 <SelectTrigger className="h-11 min-h-11 w-full border-slate-700 bg-[#0b1322] text-sm text-white data-[size=default]:!h-11 data-[size=sm]:!h-11 focus:ring-[#00A9AA]/30">
@@ -603,13 +744,12 @@ export default function AdminOrdersPage(): JSX.Element {
                 Customer
               </label>
               <Select
-                value={draftFilters.customerId}
+                value={activeFilters.customerId}
                 onValueChange={(value) =>
-                  setDraftFilters((prev) => {
-                    const next = { ...prev, customerId: value };
-                    setActiveFilters(next);
-                    return next;
-                  })
+                  updateSearchParams(
+                    { customer_id: value === "all" ? null : value, page: DEFAULT_PAGE },
+                    { replace: true },
+                  )
                 }
                 disabled={customersLoading && customers.length === 0}
               >
@@ -642,13 +782,12 @@ export default function AdminOrdersPage(): JSX.Element {
               </label>
               <Input
                 type="date"
-                value={draftFilters.startDate}
+                value={activeFilters.startDate}
                 onChange={(event) =>
-                  setDraftFilters((prev) => {
-                    const next = { ...prev, startDate: event.target.value };
-                    setActiveFilters(next);
-                    return next;
-                  })
+                  updateSearchParams(
+                    { start_date: event.target.value || null, page: DEFAULT_PAGE },
+                    { replace: true },
+                  )
                 }
                 className="h-11 min-h-11 border-slate-700 bg-[#0b1322] text-white focus-visible:ring-[#00A9AA]/30"
               />
@@ -660,13 +799,12 @@ export default function AdminOrdersPage(): JSX.Element {
               </label>
               <Input
                 type="date"
-                value={draftFilters.endDate}
+                value={activeFilters.endDate}
                 onChange={(event) =>
-                  setDraftFilters((prev) => {
-                    const next = { ...prev, endDate: event.target.value };
-                    setActiveFilters(next);
-                    return next;
-                  })
+                  updateSearchParams(
+                    { end_date: event.target.value || null, page: DEFAULT_PAGE },
+                    { replace: true },
+                  )
                 }
                 className="h-11 min-h-11 border-slate-700 bg-[#0b1322] text-white focus-visible:ring-[#00A9AA]/30"
               />
@@ -692,58 +830,164 @@ export default function AdminOrdersPage(): JSX.Element {
         ) : showEmptyState ? (
           <EmptyTableState message={emptyMessage} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="border-b border-slate-700 bg-[#0f172a] text-left text-xs text-slate-300">
-                <tr>
-                  <th className="px-5 py-3">Order</th>
-                  <th className="px-5 py-3">Customer</th>
-                  <th className="px-5 py-3">Amount</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Updated</th>
-                  <th className="px-5 py-3">Action</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-700 bg-[#10192d]">
-                {filteredOrders.map((row) => (
-                  <tr key={row.id} className="hover:bg-white/[0.035]">
-                    <td className="px-5 py-5 font-medium text-white">
-                      {row.id}
-                    </td>
-                    <td className="px-5 py-5">
-                      <p className="font-medium text-white">{row.customer}</p>
-                      <p className="text-xs text-slate-500">{row.meta}</p>
-                    </td>
-                    <td className="px-5 py-5 text-slate-300">{row.amount}</td>
-                    <td className="px-5 py-5">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize",
-                          statusClass[row.status],
-                        )}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-5 text-slate-400">
-                      {row.updatedAt}
-                    </td>
-                    <td className="px-5 py-5">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full border-slate-700 bg-transparent text-white hover:bg-white/5"
-                        onClick={() => openOrderDialog(row.id)}
-                      >
-                        Details
-                      </Button>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="border-b border-slate-700 bg-[#0f172a] text-left text-xs text-slate-300">
+                  <tr>
+                    <th className="px-5 py-3">Order</th>
+                    <th className="px-5 py-3">Customer</th>
+                    <th className="px-5 py-3">Amount</th>
+                    <th className="px-5 py-3">Status</th>
+                    <th className="px-5 py-3">Updated</th>
+                    <th className="px-5 py-3">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+
+                <tbody className="divide-y divide-slate-700 bg-[#10192d]">
+                  {filteredOrders.map((row) => (
+                    <tr key={row.id} className="hover:bg-white/[0.035]">
+                      <td className="px-5 py-5 font-medium text-white">
+                        {row.id}
+                      </td>
+                      <td className="px-5 py-5">
+                        <p className="font-medium text-white">{row.customer}</p>
+                        <p className="text-xs text-slate-500">{row.meta}</p>
+                      </td>
+                      <td className="px-5 py-5 text-slate-300">{row.amount}</td>
+                      <td className="px-5 py-5">
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize",
+                            statusClass[row.status],
+                          )}
+                        >
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-5 text-slate-400">
+                        {row.updatedAt}
+                      </td>
+                      <td className="px-5 py-5">
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-full border-slate-700 bg-transparent text-white hover:bg-white/5"
+                            onClick={() => openOrderDialog(row.id)}
+                          >
+                            Details
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="rounded-full bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                            onClick={() => handleQuickOrderAction(row.id, "paid")}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="rounded-full bg-rose-500 text-white hover:bg-rose-400"
+                            onClick={() => handleQuickOrderAction(row.id, "cancelled")}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="border-t border-slate-700 bg-[#0d1526] px-5 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-slate-400">
+                  Showing {pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.per_page + 1}-
+                  {pagination.total === 0
+                    ? 0
+                    : Math.min(
+                        pagination.page * pagination.per_page,
+                        pagination.total,
+                      )}{" "}
+                  of {pagination.total} orders
+                </div>
+
+                {pagination.pages > 0 ? (
+                  <Pagination className="mx-0 w-full justify-start sm:w-auto sm:justify-end">
+                    <PaginationContent className="w-full justify-start sm:w-auto sm:justify-end">
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          className={cn(
+                            "border-slate-700 bg-transparent text-white hover:bg-white/5",
+                            !pagination.has_prev && "pointer-events-none opacity-50",
+                          )}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            if (pagination.has_prev) {
+                              updateSearchParams(
+                                { page: Math.max(pagination.page - 1, 1) },
+                                { replace: false },
+                              );
+                            }
+                          }}
+                        />
+                      </PaginationItem>
+
+                      {buildPaginationItems(
+                        pagination.page,
+                        pagination.pages,
+                      ).map((item, index) =>
+                        item === "ellipsis" ? (
+                          <PaginationItem key={`ellipsis-${index}`}>
+                            <PaginationEllipsis className="text-slate-400" />
+                          </PaginationItem>
+                        ) : (
+                          <PaginationItem key={item}>
+                            <PaginationLink
+                              href="#"
+                              isActive={item === pagination.page}
+                              className={cn(
+                                "border-slate-700 bg-transparent text-white hover:bg-white/5",
+                                item === pagination.page &&
+                                  "border-[#00A9AA]/30 bg-[#00A9AA]/10 text-[#00A9AA]",
+                              )}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                updateSearchParams({ page: item }, { replace: false });
+                              }}
+                            >
+                              {item}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ),
+                      )}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          className={cn(
+                            "border-slate-700 bg-transparent text-white hover:bg-white/5",
+                            !pagination.has_next && "pointer-events-none opacity-50",
+                          )}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            if (pagination.has_next) {
+                              updateSearchParams(
+                                { page: pagination.page + 1 },
+                                { replace: false },
+                              );
+                            }
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                ) : null}
+              </div>
+            </div>
+          </>
         )}
       </section>
 

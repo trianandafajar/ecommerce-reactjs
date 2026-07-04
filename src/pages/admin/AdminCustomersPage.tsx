@@ -786,94 +786,111 @@ export default function AdminCustomersPage() {
         open={dialogMode !== null}
         onOpenChange={(open) => (!open ? closeFormDialog() : null)}
       >
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-[min(96vw,1040px)]">
           <DialogHeader className="pr-12">
+            <p className="text-xs uppercase tracking-[0.35em] text-[#00A9AA]">
+              Customer record
+            </p>
             <DialogTitle>
               {dialogMode === "edit" ? "Edit customer" : "Add customer"}
             </DialogTitle>
-            <DialogDescription>
-              Update the customer record shown in the admin table.
+            <DialogDescription className="max-w-2xl">
+              Keep contact details, status, and identity aligned with the live
+              customer profile.
             </DialogDescription>
           </DialogHeader>
 
-          <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={handleSubmit}>
-            {formError ? (
-              <div className="sm:col-span-2 rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {formError}
+          <form className="mt-6" onSubmit={handleSubmit}>
+            <div className="space-y-5">
+              {formError ? (
+                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                  {formError}
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-sm text-slate-300">Customer name</label>
+                  <Input
+                    value={form.name}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, name: event.target.value }))
+                    }
+                    placeholder="Enter customer name"
+                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300">Email</label>
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, email: event.target.value }))
+                    }
+                    placeholder="name@example.com"
+                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-slate-300">Phone</label>
+                  <Input
+                    value={form.phone}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, phone: event.target.value }))
+                    }
+                    placeholder="+62 ..."
+                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                  />
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-sm text-slate-300">Status</label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(value) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        status: value as Exclude<CustomerStatus, "all">,
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="h-11 min-h-11 w-full border-slate-800 bg-slate-950 text-sm text-white data-[size=default]:!h-11 data-[size=sm]:!h-11 focus:ring-[#00A9AA]/30">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-800 bg-[#0b1322] text-white z-[999999]">
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            ) : null}
-            <div className="space-y-2">
-              <label className="text-sm text-slate-300">Customer name</label>
-              <Input
-                value={form.name}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, name: event.target.value }))
-                }
-                placeholder="Enter customer name"
-                className="border-slate-800 bg-slate-900 text-white"
-              />
+
+              <DialogFooter className="pt-2 sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-slate-700 bg-transparent text-white hover:bg-white/5"
+                  onClick={closeFormDialog}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-slate-100 text-slate-950 hover:bg-white"
+                  disabled={submitting}
+                >
+                  {submitting
+                    ? "Saving..."
+                    : dialogMode === "edit"
+                      ? "Save changes"
+                      : "Create customer"}
+                </Button>
+              </DialogFooter>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-300">Email</label>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, email: event.target.value }))
-                }
-                placeholder="Enter email"
-                className="border-slate-800 bg-slate-900 text-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-300">Phone</label>
-              <Input
-                value={form.phone}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, phone: event.target.value }))
-                }
-                placeholder="+62 ..."
-                className="border-slate-800 bg-slate-900 text-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-slate-300">Status</label>
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    status: event.target.value as Exclude<CustomerStatus, "all">,
-                  }))
-                }
-                className="h-10 w-full rounded-md border border-slate-800 bg-slate-900 px-3 text-sm text-white outline-none"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-            <DialogFooter className="sm:col-span-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800"
-                onClick={closeFormDialog}
-                disabled={submitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-slate-100 text-slate-950 hover:bg-white"
-                disabled={submitting}
-              >
-                {submitting
-                  ? "Saving..."
-                  : dialogMode === "edit"
-                    ? "Save changes"
-                    : "Create customer"}
-              </Button>
-            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
