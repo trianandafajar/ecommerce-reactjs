@@ -5,6 +5,7 @@ import type { Order } from "./types/order";
 import {
   createOrder,
   fetchOrders,
+  fetchAdminOrders,
   fetchOrder,
   fetchAdminOrder,
   updateOrderStatus,
@@ -57,6 +58,21 @@ const orderSlice = createSlice({
         state.orders = action.payload;
       })
       .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Fetch admin orders
+    builder
+      .addCase(fetchAdminOrders.pending, (state) => {
+        state.loading = true;
+        state.error = undefined;
+      })
+      .addCase(fetchAdminOrders.fulfilled, (state, action: PayloadAction<Order[]>) => {
+        state.loading = false;
+        state.orders = action.payload;
+      })
+      .addCase(fetchAdminOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

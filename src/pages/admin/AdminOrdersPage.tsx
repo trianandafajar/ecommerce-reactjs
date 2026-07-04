@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
-import { ArrowUpRight, Check, Filter, X } from "lucide-react";
+import { ArrowUpRight, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { fetchOrders } from "@/features/order/orderThunks";
+import { fetchAdminOrders } from "@/features/order/orderThunks";
 import {
   selectOrderError,
   selectOrderLoading,
@@ -26,6 +29,13 @@ import { cn } from "@/lib/utils";
 import { GET, POST } from "@/lib/api";
 import type { StandardResponse } from "@/types/api";
 import type { Order } from "@/features/order/types/order";
+
+type ApiCustomer = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+};
 
 type DisplayOrder = {
   id: string;
@@ -37,7 +47,21 @@ type DisplayOrder = {
 };
 
 type OrderFilter = "all" | DisplayOrder["status"];
+type OrderFilters = {
+  status: OrderFilter;
+  customerId: string;
+  startDate: string;
+  endDate: string;
+};
+
 type DetailAction = "approve" | "reject" | null;
+
+const initialFilters: OrderFilters = {
+  status: "all",
+  customerId: "all",
+  startDate: "",
+  endDate: "",
+};
 
 const statusClass: Record<DisplayOrder["status"], string> = {
   pending: "bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20",
@@ -222,7 +246,15 @@ export default function AdminOrdersPage(): JSX.Element {
   const loading = useAppSelector(selectOrderLoading);
   const error = useAppSelector(selectOrderError);
   const [hasRequested, setHasRequested] = useState(false);
-  const [filter, setFilter] = useState<OrderFilter>("all");
+  const [customers, setCustomers] = useState<ApiCustomer[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customersError, setCustomersError] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [draftFilters, setDraftFilters] =
+    useState<OrderFilters>(initialFilters);
+  const [activeFilters, setActiveFilters] =
+    useState<OrderFilters>(initialFilters);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [orderDetail, setOrderDetail] = useState<Order | null>(null);
@@ -231,9 +263,76 @@ export default function AdminOrdersPage(): JSX.Element {
   const [detailAction, setDetailAction] = useState<DetailAction>(null);
 
   useEffect(() => {
+    let active = true;
+    setCustomersLoading(true);
+    setCustomersError(null);
+
+    const loadCustomers = async () => {
+      try {
+        const response = await GET<StandardResponse<ApiCustomer[]>>(
+          "/admin/customers",
+          {
+            params: { skip: 0, limit: 100 },
+          },
+        );
+
+        if (response.status !== "success") {
+          throw new Error(response.message || "Failed to load customers");
+        }
+
+        if (active) {
+          setCustomers(response.data);
+        }
+      } catch (loadError) {
+        if (active) {
+          setCustomers([]);
+          setCustomersError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Failed to load customers",
+          );
+        }
+      } finally {
+        if (active) {
+          setCustomersLoading(false);
+        }
+      }
+    };
+
+    void loadCustomers();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [searchInput]);
+
+  useEffect(() => {
     setHasRequested(true);
-    void dispatch(fetchOrders());
-  }, [dispatch]);
+    void dispatch(
+      fetchAdminOrders({
+        status_value:
+          activeFilters.status === "all" ? undefined : activeFilters.status,
+        customer_id:
+          activeFilters.customerId === "all"
+            ? undefined
+            : activeFilters.customerId,
+        start_date: activeFilters.startDate || undefined,
+        end_date: activeFilters.endDate || undefined,
+        search: debouncedSearch || undefined,
+        limit: 200,
+      }),
+    );
+  }, [dispatch, activeFilters, debouncedSearch]);
 
   useEffect(() => {
     if (!orderDialogOpen || !selectedOrderId) return;
@@ -283,13 +382,14 @@ export default function AdminOrdersPage(): JSX.Element {
     [liveOrders],
   );
 
-  const filteredOrders = useMemo(
-    () =>
-      filter === "all"
-        ? displayOrders
-        : displayOrders.filter((order) => order.status === filter),
-    [displayOrders, filter],
-  );
+  const filteredOrders = displayOrders;
+
+  const activeFilterCount =
+    (activeFilters.status !== "all" ? 1 : 0) +
+    (activeFilters.customerId !== "all" ? 1 : 0) +
+    (activeFilters.startDate ? 1 : 0) +
+    (activeFilters.endDate ? 1 : 0) +
+    (debouncedSearch ? 1 : 0);
 
   const stats = useMemo(
     () => [
@@ -319,11 +419,10 @@ export default function AdminOrdersPage(): JSX.Element {
   const showSkeleton = loading || (!hasRequested && liveOrders.length === 0);
   const showEmptyState =
     hasRequested && !loading && filteredOrders.length === 0;
-  const emptyMessage =
-    error || filter !== "all"
-      ? filter === "all"
-        ? "The API could not be loaded, so the table is empty for now."
-        : "No orders match the selected filter."
+  const emptyMessage = error
+    ? error
+    : activeFilterCount > 0
+      ? "No orders match the selected filters."
       : "No orders have been created yet.";
 
   const closeOrderDialog = () => {
@@ -341,7 +440,27 @@ export default function AdminOrdersPage(): JSX.Element {
   };
 
   const refreshOrders = async () => {
-    await dispatch(fetchOrders());
+    await dispatch(
+      fetchAdminOrders({
+        status_value:
+          activeFilters.status === "all" ? undefined : activeFilters.status,
+        customer_id:
+          activeFilters.customerId === "all"
+            ? undefined
+            : activeFilters.customerId,
+        start_date: activeFilters.startDate || undefined,
+        end_date: activeFilters.endDate || undefined,
+        search: debouncedSearch || undefined,
+        limit: 200,
+      }),
+    );
+  };
+
+  const resetFilters = () => {
+    setDraftFilters(initialFilters);
+    setActiveFilters(initialFilters);
+    setSearchInput("");
+    setDebouncedSearch("");
   };
 
   const handleOrderAction = async (nextStatus: "paid" | "cancelled") => {
@@ -352,7 +471,7 @@ export default function AdminOrdersPage(): JSX.Element {
     try {
       const actionPath = nextStatus === "paid" ? "approve" : "reject";
       const response = await POST<StandardResponse<Order>>(
-        `/admin/orders/${selectedOrderId}/${actionPath}`
+        `/admin/orders/${selectedOrderId}/${actionPath}`,
       );
 
       if (response.status !== "success") {
@@ -405,7 +524,7 @@ export default function AdminOrdersPage(): JSX.Element {
       </section>
 
       <section className="rounded-md border border-slate-700 bg-[#10192d]">
-        <div className="flex flex-col gap-3 border-b border-slate-700 p-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-white">
               Order Management
@@ -416,78 +535,155 @@ export default function AdminOrdersPage(): JSX.Element {
           </div>
 
           <div className="flex gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-slate-700 bg-transparent text-white hover:bg-white/5"
-                >
-                  <Filter className="h-4 w-4" />
-                  {filter === "all"
-                    ? "Filter"
-                    : `Filter: ${filter.charAt(0).toUpperCase() + filter.slice(1)}`}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="w-64 border-slate-800 bg-slate-950 p-2 text-white">
-                <div className="px-2 py-1.5">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-                    Filter orders
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Choose one status at a time.
-                  </p>
-                </div>
-
-                <div className="mt-2 space-y-1">
-                  {[
-                    { key: "all", label: "All orders" },
-                    { key: "pending", label: "Pending" },
-                    { key: "paid", label: "Paid" },
-                    { key: "shipped", label: "Shipped" },
-                    { key: "completed", label: "Completed" },
-                    { key: "cancelled", label: "Cancelled" },
-                  ].map((option) => {
-                    const active = filter === option.key;
-
-                    return (
-                      <button
-                        key={option.key}
-                        type="button"
-                        onClick={() => setFilter(option.key as OrderFilter)}
-                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                          active
-                            ? "bg-[#00A9AA]/10 text-[#00A9AA]"
-                            : "text-slate-300 hover:bg-white/5 hover:text-white"
-                        }`}
-                      >
-                        <span>{option.label}</span>
-                        {active ? <Check className="h-4 w-4" /> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {filter !== "all" ? (
-                  <div className="mt-2 border-t border-slate-800 pt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full border-slate-700 bg-transparent text-white hover:bg-white/5"
-                      onClick={() => setFilter("all")}
-                    >
-                      <X className="h-4 w-4" />
-                      Clear filter
-                    </Button>
-                  </div>
-                ) : null}
-              </PopoverContent>
-            </Popover>
-
             <Button className="bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]">
               Export
               <ArrowUpRight className="h-4 w-4" />
             </Button>
+          </div>
+        </div>
+
+        <div className="border-b border-slate-700 bg-[#10192d] px-4 pb-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:flex-nowrap xl:items-end xl:gap-3">
+            <div className="space-y-2 min-w-0 xl:flex-[2.7_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Search
+              </label>
+              <div className="relative">
+                <Input
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder="Order ID, customer, address, city, phone..."
+                  className="h-11 min-h-11 border-slate-700 bg-[#0b1322] pr-10 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                />
+                {searchInput.trim() ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full text-slate-400 hover:bg-white/5 hover:text-white"
+                    onClick={() => setSearchInput("")}
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="space-y-2 min-w-0 xl:flex-[1.05_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Status
+              </label>
+              <Select
+                value={draftFilters.status}
+                onValueChange={(value) =>
+                  setDraftFilters((prev) => {
+                    const next = { ...prev, status: value as OrderFilter };
+                    setActiveFilters(next);
+                    return next;
+                  })
+                }
+              >
+                <SelectTrigger className="h-11 min-h-11 w-full border-slate-700 bg-[#0b1322] text-sm text-white data-[size=default]:!h-11 data-[size=sm]:!h-11 focus:ring-[#00A9AA]/30">
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent className="border-slate-700 bg-[#0b1322] text-white">
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 min-w-0 xl:flex-[1.2_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Customer
+              </label>
+              <Select
+                value={draftFilters.customerId}
+                onValueChange={(value) =>
+                  setDraftFilters((prev) => {
+                    const next = { ...prev, customerId: value };
+                    setActiveFilters(next);
+                    return next;
+                  })
+                }
+                disabled={customersLoading && customers.length === 0}
+              >
+                <SelectTrigger className="h-11 min-h-11 w-full border-slate-700 bg-[#0b1322] text-sm text-white data-[size=default]:!h-11 data-[size=sm]:!h-11 focus:ring-[#00A9AA]/30">
+                  <SelectValue
+                    placeholder={
+                      customersLoading
+                        ? "Loading customers..."
+                        : "All customers"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent className="border-slate-700 bg-[#0b1322] text-white">
+                  <SelectItem value="all">All customers</SelectItem>
+                  {customers.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name} - {customer.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {customersError ? (
+                <p className="text-xs text-rose-300">{customersError}</p>
+              ) : null}
+            </div>
+
+            <div className="space-y-2 min-w-0 xl:flex-[1_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Start date
+              </label>
+              <Input
+                type="date"
+                value={draftFilters.startDate}
+                onChange={(event) =>
+                  setDraftFilters((prev) => {
+                    const next = { ...prev, startDate: event.target.value };
+                    setActiveFilters(next);
+                    return next;
+                  })
+                }
+                className="h-11 min-h-11 border-slate-700 bg-[#0b1322] text-white focus-visible:ring-[#00A9AA]/30"
+              />
+            </div>
+
+            <div className="space-y-2 min-w-0 xl:flex-[1_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                End date
+              </label>
+              <Input
+                type="date"
+                value={draftFilters.endDate}
+                onChange={(event) =>
+                  setDraftFilters((prev) => {
+                    const next = { ...prev, endDate: event.target.value };
+                    setActiveFilters(next);
+                    return next;
+                  })
+                }
+                className="h-11 min-h-11 border-slate-700 bg-[#0b1322] text-white focus-visible:ring-[#00A9AA]/30"
+              />
+            </div>
+
+            <div className="flex items-end xl:shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full border-slate-700 bg-transparent px-5 text-white hover:bg-white/5 xl:w-auto"
+                onClick={resetFilters}
+                disabled={activeFilterCount === 0}
+              >
+                <Filter className="h-4 w-4" />
+                Clear filters
+              </Button>
+            </div>
           </div>
         </div>
 
