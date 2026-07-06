@@ -73,7 +73,6 @@ export const router = createBrowserRouter([
               { path: "/cart", element: <CartPage /> },
               { path: "/checkout", element: <CheckoutPage /> },
               { path: "/bookmarks", element: <BookmarksPage /> },
-              { path: "/profile", element: <ProfilePage /> },
             ],
           },
           {
@@ -82,6 +81,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
               { path: "dashboard", element: <AdminOverviewPage /> },
+              { path: "profile", element: <ProfilePage /> },
               { path: "orders", element: <AdminOrdersPage /> },
               { path: "customers", element: <AdminCustomersPage /> },
               { path: "products", element: <AdminProductsPage /> },
