@@ -1,13 +1,12 @@
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectUser, selectUserRole } from "@/features/auth/authSlice";
+import { selectUser } from "@/features/auth/authSlice";
 import { fetchCurrentUserThunk } from "@/features/auth/authThunks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PUT } from "@/lib/api";
 import type { StandardResponse } from "@/types/api";
-import { cn } from "@/lib/utils";
 
 type ProfileFormState = {
   name: string;
@@ -29,7 +28,6 @@ function getInitials(name?: string) {
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
-  const role = useAppSelector(selectUserRole);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +48,8 @@ export default function ProfilePage() {
     });
   }, [user]);
 
-  const profileName = form.name || user?.name || "Administrator";
-  const profileEmail = form.email || user?.email || "admin@store.local";
-  const profileRole = role ?? "admin";
-  const isActive = user?.is_active !== false;
-  const profileStatus = isActive ? "Active" : "Inactive";
+  const profileName = form.name || user?.name || "Profile";
+  const profileEmail = form.email || user?.email || "";
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,37 +80,19 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-md border border-slate-800 bg-slate-900">
-        <div className="flex flex-col gap-4 border-b border-slate-800 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-950 text-2xl font-semibold text-[#00A9AA]">
-              {getInitials(profileName)}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.32em] text-slate-500">Profile</p>
-              <h1 className="truncate text-2xl font-semibold text-white">{profileName}</h1>
-              <p className="truncate text-sm text-slate-400">{profileEmail}</p>
-            </div>
+      <section className="rounded-md border border-slate-800 bg-slate-900 p-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-950 text-xl font-semibold text-[#00A9AA]">
+            {getInitials(profileName)}
           </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                "inline-flex items-center rounded-md px-3 py-1 text-xs font-medium ring-1",
-                isActive
-                  ? "border border-emerald-400/20 bg-emerald-400/10 text-emerald-200 ring-emerald-400/20"
-                  : "border border-rose-400/20 bg-rose-400/10 text-rose-200 ring-rose-400/20",
-              )}
-            >
-              {profileStatus}
-            </span>
-            <span className="inline-flex items-center rounded-md border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-medium text-slate-300 ring-1 ring-slate-800">
-              {profileRole}
-            </span>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.32em] text-slate-500">Profile</p>
+            <h1 className="truncate text-2xl font-semibold text-white">{profileName}</h1>
+            {profileEmail ? <p className="truncate text-sm text-slate-400">{profileEmail}</p> : null}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 px-6 py-6">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {error ? (
             <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
               {error}

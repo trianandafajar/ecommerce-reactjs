@@ -54,7 +54,7 @@ export default function LoginPage() {
           ? result.payload?.user?.role ?? (fetchCurrentUserThunk.fulfilled.match(currentUserResult) ? currentUserResult.payload?.role : undefined)
           : undefined;
 
-      navigate(role === "admin" ? "/admin" : "/");
+      navigate(role === "admin" ? "/admin" : "/my");
     }
   };
 

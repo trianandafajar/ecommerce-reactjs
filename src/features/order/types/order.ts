@@ -26,7 +26,11 @@ export interface Order {
   id: string;
   user_id?: string;
   status: "pending" | "paid" | "shipped" | "completed" | "cancelled";
-  payment_method: "cod" | "bank_transfer";
+  payment_method: "delivery" | "stripe";
+  payment_provider?: string | null;
+  stripe_checkout_session_id?: string | null;
+  stripe_payment_intent_id?: string | null;
+  stripe_customer_id?: string | null;
   first_name?: string;
   last_name?: string;
   address: string;
@@ -35,6 +39,7 @@ export interface Order {
   phone?: string;
   total_amount: Decimal;
   created_at: string;
+  updated_at?: string | null;
   items: OrderItem[];
 }
 
@@ -42,7 +47,7 @@ export interface Order {
 export interface OrderCreate {
   user_id?: string;
   status?: "pending" | "paid" | "shipped" | "completed" | "cancelled"; 
-  payment_method: "cod" | "bank_transfer";
+  payment_method: "delivery" | "stripe";
   first_name?: string;
   last_name?: string;
   address: string;

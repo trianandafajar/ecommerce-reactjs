@@ -5,8 +5,8 @@ import { Footer } from "./foother";
 import { useAppSelector } from "@/app/hooks";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
 
-const NO_FOOTER_ROUTES = ["/admin", "/auth"];
-const NO_HEADER_ROUTES = ["/admin"];
+const NO_FOOTER_ROUTES = ["/admin", "/auth", "/my"];
+const NO_HEADER_ROUTES = ["/admin", "/my"];
 const PROTECTED_ROUTES = ["/cart", "/checkout", "/bookmarks"];
 
 export default function MainLayout() {

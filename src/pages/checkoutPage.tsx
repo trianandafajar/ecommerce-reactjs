@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, CreditCard, Truck, ChevronRight } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, ChevronRight, ShieldCheck } from "lucide-react";
 
 import * as cartSlice from "@/features/cart/cartSlice";
 import { selectIsAuthenticated } from "@/features/auth/authSlice";
@@ -11,6 +11,14 @@ import { createOrder } from "@/features/order/orderThunks";
 import type { OrderCreate } from "@/features/order/types/order";
 import { Decimal } from "decimal.js";
 import { clearCart } from "@/features/cart/cartThunks";
+import { POST } from "@/lib/api";
+import type { StandardResponse } from "@/types/api";
+
+type StripeCheckoutSessionResponse = {
+  id: string;
+  url: string | null;
+  order_id: string;
+};
 
 export default function CheckoutPage() {
   const dispatch = useAppDispatch();
@@ -29,11 +37,12 @@ export default function CheckoutPage() {
     city: "",
     postalCode: "",
     phone: "",
-    paymentMethod: "cod",
+    paymentMethod: "delivery",
   });
 
   const [isSuccess, setIsSuccess] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [redirectingToStripe, setRedirectingToStripe] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -73,7 +82,7 @@ export default function CheckoutPage() {
     }));
 
     const payload: OrderCreate = {
-      payment_method: formData.paymentMethod as "cod" | "bank_transfer",
+      payment_method: formData.paymentMethod as "delivery" | "stripe",
       first_name: formData.firstName || undefined,
       last_name: formData.lastName || undefined,
       address: formData.address,
@@ -87,6 +96,31 @@ export default function CheckoutPage() {
       const result = await dispatch(createOrder(payload)).unwrap();
       setOrderId(result.id);
 
+      if (formData.paymentMethod === "stripe") {
+        setRedirectingToStripe(true);
+
+        const sessionResponse = await POST<StandardResponse<StripeCheckoutSessionResponse>>(
+          "/payment/stripe/checkout-session",
+          {
+            order_id: result.id,
+            success_url: `${window.location.origin}/my/orders/${result.id}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${window.location.origin}/checkout?payment=cancelled&order_id=${result.id}`,
+          },
+        );
+
+        if (sessionResponse.status !== "success" || !sessionResponse.data.url) {
+          throw new Error(sessionResponse.message || "Failed to start Stripe checkout");
+        }
+
+        if (cart?.id) {
+          await dispatch(clearCart(cart.id)).unwrap();
+        }
+
+        dispatch(cartSlice.resetCart());
+        window.location.href = sessionResponse.data.url;
+        return;
+      }
+
       if (cart?.id) {
         await dispatch(clearCart(cart.id)).unwrap();
       }
@@ -95,6 +129,7 @@ export default function CheckoutPage() {
       setIsSuccess(true);
     } catch (err: any) {
       alert("Failed to place order: " + (err.message || err));
+      setRedirectingToStripe(false);
     }
   };
 
@@ -129,6 +164,30 @@ export default function CheckoutPage() {
             <p className="text-sm text-muted-foreground">
               A confirmation email has been sent to your registered address.
             </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (redirectingToStripe) {
+    return (
+      <main className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-8 animate-in fade-in duration-300">
+          <div className="w-24 h-24 bg-cyan-500/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ShieldCheck className="w-12 h-12" />
+          </div>
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight">Redirecting to Stripe</h1>
+            <p className="text-muted-foreground text-lg">
+              Your order <span className="text-foreground font-mono font-bold">#{orderId?.slice(0, 8)}</span> is still pending.
+              Complete the payment on Stripe first, then the order will move to paid.
+            </p>
+          </div>
+          <div className="pt-8">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-border">
+              <div className="h-full w-1/2 rounded-full bg-cyan-400 animate-pulse" />
+            </div>
           </div>
         </div>
       </main>
@@ -246,35 +305,35 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-card border rounded-2xl p-8">
                 <button 
                   type="button"
-                  onClick={() => setFormData({...formData, paymentMethod: 'cod'})}
-                  className={`relative p-6 border rounded-2xl transition-all text-left flex items-start gap-4 ${formData.paymentMethod === 'cod' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
+                  onClick={() => setFormData({...formData, paymentMethod: 'delivery'})}
+                  className={`relative p-6 border rounded-2xl transition-all text-left flex items-start gap-4 ${formData.paymentMethod === 'delivery' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
                 >
-                  <div className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${formData.paymentMethod === 'cod' ? 'border-primary' : 'border-muted-foreground'}`}>
-                    {formData.paymentMethod === 'cod' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
+                  <div className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${formData.paymentMethod === 'delivery' ? 'border-primary' : 'border-muted-foreground'}`}>
+                    {formData.paymentMethod === 'delivery' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 font-bold">
                       <Truck className="w-5 h-5 text-primary" />
-                      <span>Cash on Delivery</span>
+                      <span>Delivery</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">Pay when your order is delivered to your door.</p>
+                    <p className="text-sm text-muted-foreground">Pay on delivery after the order arrives at your address.</p>
                   </div>
                 </button>
 
-                <button 
+                <button
                   type="button"
-                  onClick={() => setFormData({...formData, paymentMethod: 'bank_transfer'})}
-                  className={`relative p-6 border rounded-2xl transition-all text-left flex items-start gap-4 ${formData.paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
+                  onClick={() => setFormData({ ...formData, paymentMethod: "stripe" })}
+                  className={`relative p-6 border rounded-2xl transition-all text-left flex items-start gap-4 ${formData.paymentMethod === "stripe" ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:border-primary/50"}`}
                 >
-                  <div className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${formData.paymentMethod === 'bank_transfer' ? 'border-primary' : 'border-muted-foreground'}`}>
-                    {formData.paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
+                  <div className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${formData.paymentMethod === "stripe" ? "border-primary" : "border-muted-foreground"}`}>
+                    {formData.paymentMethod === "stripe" && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 font-bold">
-                      <CreditCard className="w-5 h-5 text-primary" />
-                      <span>Bank Transfer</span>
+                      <ShieldCheck className="w-5 h-5 text-primary" />
+                      <span>Stripe</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">Transfer assets via our secure banking nodes.</p>
+                    <p className="text-sm text-muted-foreground">Pay now with Stripe. The order stays pending until payment succeeds.</p>
                   </div>
                 </button>
               </div>
@@ -325,7 +384,7 @@ export default function CheckoutPage() {
                 disabled={loading}
                 className="w-full h-14 rounded-xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/10 transition-all active:scale-95"
               >
-                {loading ? "Processing..." : "Place Order"}
+                {loading ? "Processing..." : formData.paymentMethod === "stripe" ? "Pay with Stripe" : "Place Order"}
                 <ChevronRight className="w-5 h-5" />
               </Button>
 

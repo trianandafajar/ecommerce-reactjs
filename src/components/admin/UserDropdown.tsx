@@ -51,6 +51,8 @@ export default function UserDropdown() {
   const profileRole = role ?? "admin";
   const profileStatus = user?.is_active === false ? "Inactive" : "Active";
   const isActive = profileStatus === "Active";
+  const dashboardPath = profileRole === "admin" ? "/admin/dashboard" : "/my/dashboard";
+  const profilePath = profileRole === "admin" ? "/admin/profile" : "/my/profile";
 
   const handleLogout = async (): Promise<void> => {
     await dispatch(logoutThunk());
@@ -129,7 +131,7 @@ export default function UserDropdown() {
         <div className="p-2">
           <button
             type="button"
-            onClick={() => navigate("/admin/profile")}
+            onClick={() => navigate(dashboardPath)}
             className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-900 text-slate-300">
@@ -138,9 +140,26 @@ export default function UserDropdown() {
 
             <div>
               <p className="text-sm font-semibold text-slate-200">
-                View Profile
+                Dashboard
               </p>
-              <p className="text-xs text-slate-500">Account information</p>
+              <p className="text-xs text-slate-500">Open role dashboard</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate(profilePath)}
+            className="mt-1 flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-900 text-slate-300">
+              <UserRound className="h-4 w-4" />
+            </span>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-200">
+                Profile
+              </p>
+              <p className="text-xs text-slate-500">Open account profile</p>
             </div>
           </button>
 
