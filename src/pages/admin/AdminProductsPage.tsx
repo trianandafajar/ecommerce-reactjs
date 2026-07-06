@@ -49,6 +49,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import { DELETE, GET, POST, PUT } from "@/lib/api";
 import type { StandardResponse, PaginationMeta } from "@/types/api";
 import type { Product } from "@/features/product/types/product";
@@ -63,16 +64,26 @@ type ProductListResponse = StandardResponse<Product[]> & {
 type ProductCategoryResponse = StandardResponse<string[]>;
 
 type ProductFilter = "all" | string;
-type ProductFormMode = "preset" | "custom";
 type ProductDialogMode = "create" | "edit" | null;
+
+const DEFAULT_PRODUCT_CATEGORIES = [
+  "Mechanical Keyboard",
+  "Gaming Keyboard",
+  "Keyboard Switches",
+  "Keycaps",
+  "Stabilizers",
+  "Coiled Cable",
+  "Keyboard Case",
+  "Keyboard Kit",
+  "Deskmat",
+  "Keyboard Accessories",
+];
 
 type ProductFormState = {
   name: string;
   price: string;
   imageUrl: string;
-  categoryMode: ProductFormMode;
   selectedCategory: string;
-  customCategory: string;
   description: string;
 };
 
@@ -93,9 +104,7 @@ const initialForm: ProductFormState = {
   name: "",
   price: "",
   imageUrl: "",
-  categoryMode: "preset",
   selectedCategory: "",
-  customCategory: "",
   description: "",
 };
 
@@ -218,6 +227,7 @@ function EmptyState({ message }: { message: string }) {
 }
 
 export default function AdminProductsPage() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -250,23 +260,24 @@ export default function AdminProductsPage() {
     [products, selectedProduct],
   );
 
-  const currentCategoryValue = useMemo(() => {
-    if (form.categoryMode === "custom") {
-      return form.customCategory.trim();
-    }
-
-    return form.selectedCategory.trim();
-  }, [form.categoryMode, form.customCategory, form.selectedCategory]);
+  const dialogCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [...DEFAULT_PRODUCT_CATEGORIES, ...categories, ...(form.selectedCategory ? [form.selectedCategory] : [])]
+            .map((value) => value.trim())
+            .filter(Boolean),
+        ),
+      ),
+    [categories, form.selectedCategory],
+  );
 
   const previewProduct: ProductPreview = {
     id: currentProduct?.id ?? "preview",
     name: form.name || "Preview product",
     price: Number(form.price) || 0,
     image_url: form.imageUrl || null,
-    category:
-      form.categoryMode === "custom"
-        ? form.customCategory || "Custom"
-        : form.selectedCategory || "Uncategorized",
+    category: form.selectedCategory || "Uncategorized",
     description: form.description || "",
     created_at: currentProduct?.created_at,
     updated_at: currentProduct?.updated_at,
@@ -393,33 +404,11 @@ export default function AdminProductsPage() {
   };
 
   const openCreateDialog = () => {
-    const defaultCategory = categories[0] ?? "";
-    setSelectedProduct(null);
-    setForm({
-      ...initialForm,
-      categoryMode: defaultCategory ? "preset" : "custom",
-      selectedCategory: defaultCategory,
-    });
-    setFormError(null);
-    setDialogMode("create");
+    navigate("/admin/products/new");
   };
 
   const openEditDialog = (product: Product) => {
-    const existingCategory = product.category?.trim() ?? "";
-    const categoryKnown = categories.includes(existingCategory);
-
-    setSelectedProduct(product);
-    setForm({
-      name: product.name,
-      price: String(product.price),
-      imageUrl: product.image_url ?? "",
-      categoryMode: categoryKnown ? "preset" : "custom",
-      selectedCategory: categoryKnown ? existingCategory : categories[0] ?? "",
-      customCategory: categoryKnown ? "" : existingCategory,
-      description: product.description ?? "",
-    });
-    setFormError(null);
-    setDialogMode("edit");
+    navigate(`/admin/products/${product.id}/edit`);
   };
 
   const closeFormDialog = () => {
@@ -470,7 +459,7 @@ export default function AdminProductsPage() {
     event.preventDefault();
     setFormError(null);
 
-    const resolvedCategory = currentCategoryValue;
+    const resolvedCategory = form.selectedCategory.trim();
     if (!resolvedCategory) {
       setFormError("Category is required.");
       return;
@@ -846,23 +835,23 @@ export default function AdminProductsPage() {
       </section>
 
       <Dialog open={dialogMode !== null} onOpenChange={(open) => (!open ? closeFormDialog() : null)}>
-        <DialogContent className="h-[92vh] w-[96vw] max-w-[1280px] overflow-hidden border-slate-800 bg-[#10192d] p-0 text-white shadow-2xl shadow-black/50">
-          <div className="flex h-full flex-col">
-            <div className="shrink-0 border-b border-slate-800 bg-[#0b1322] px-7 py-5">
-              <DialogHeader className="pr-12">
-                <DialogTitle className="text-xl font-semibold text-white">
-                  {dialogMode === "edit" ? "Edit product" : "Add product"}
-                </DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-slate-400">
-                  Add product details, pricing, category, image, and description.
-                </DialogDescription>
-              </DialogHeader>
-            </div>
+        <DialogContent className="!flex !flex-col h-[94vh] w-[96vw] max-w-[1360px] overflow-hidden border-slate-800 bg-[#10192d] p-0 text-white shadow-2xl shadow-black/50">
+          <div className="shrink-0 border-b border-slate-800 bg-[#0b1322] px-7 py-5">
+            <DialogHeader className="pr-12">
+              <DialogTitle className="text-xl font-semibold text-white">
+                {dialogMode === "edit" ? "Edit product" : "Add product"}
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-slate-400">
+                Add product details, pricing, category, image, and description.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-            <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
-              <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(380px,0.8fr)]">
-                <div className="min-h-0 overflow-y-auto px-7 py-6 lg:border-r lg:border-slate-800">
-                  <div className="mx-auto max-w-3xl space-y-6">
+          <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="grid min-h-0 lg:grid-cols-[minmax(0,1.2fr)_minmax(380px,0.8fr)]">
+                <div className="px-7 py-6 lg:border-r lg:border-slate-800">
+                  <div className="space-y-6">
                     {formError ? (
                       <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
                         {formError}
@@ -920,22 +909,11 @@ export default function AdminProductsPage() {
                         <div className="space-y-2">
                           <label className="text-sm text-slate-300">Category</label>
                           <Select
-                            value={form.categoryMode === "custom" ? "__custom__" : form.selectedCategory}
+                            value={form.selectedCategory}
                             onValueChange={(value) => {
-                              if (value === "__custom__") {
-                                setForm((prev) => ({
-                                  ...prev,
-                                  categoryMode: "custom",
-                                  customCategory: prev.customCategory || prev.selectedCategory,
-                                }));
-                                return;
-                              }
-
                               setForm((prev) => ({
                                 ...prev,
-                                categoryMode: "preset",
                                 selectedCategory: value,
-                                customCategory: "",
                               }));
                             }}
                           >
@@ -943,29 +921,14 @@ export default function AdminProductsPage() {
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent className="border-slate-800 bg-[#0b1322] text-white">
-                              {categories.map((category) => (
+                              {dialogCategories.map((category) => (
                                 <SelectItem key={category} value={category}>
                                   {category}
                                 </SelectItem>
                               ))}
-                              <SelectItem value="__custom__">Custom category</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
-
-                        {form.categoryMode === "custom" ? (
-                          <div className="space-y-2">
-                            <label className="text-sm text-slate-300">Custom category</label>
-                            <Input
-                              value={form.customCategory}
-                              onChange={(event) =>
-                                setForm((prev) => ({ ...prev, customCategory: event.target.value }))
-                              }
-                              placeholder="Type a new category"
-                              className="h-12 rounded-xl border-slate-700 bg-[#111b30] text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
-                            />
-                          </div>
-                        ) : null}
                       </div>
                     </div>
 
@@ -980,8 +943,8 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
-                <div className="min-h-0 overflow-y-auto bg-[#0b1322]/70 px-7 py-6">
-                  <div className="sticky top-0 space-y-5">
+                <div className="bg-[#0b1322]/70 px-7 py-6">
+                  <div className="space-y-5">
                     <div className="overflow-hidden rounded-3xl border border-slate-800 bg-[#10192d] shadow-xl shadow-black/20">
                       <div className="aspect-[16/10] bg-slate-950">
                         {previewProduct.image_url ? (
@@ -1040,31 +1003,31 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <DialogFooter className="shrink-0 border-t border-slate-800 bg-[#0b1322] px-7 py-5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-slate-700 bg-transparent text-white hover:bg-white/5"
-                  onClick={closeFormDialog}
-                  disabled={submitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]"
-                  disabled={submitting}
-                >
-                  {submitting
-                    ? "Saving..."
-                    : dialogMode === "edit"
-                      ? "Save changes"
-                      : "Create product"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </div>
+            <DialogFooter className="shrink-0 border-t border-slate-800 bg-[#0b1322] px-7 py-5">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-slate-700 bg-transparent text-white hover:bg-white/5"
+                onClick={closeFormDialog}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]"
+                disabled={submitting}
+              >
+                {submitting
+                  ? "Saving..."
+                  : dialogMode === "edit"
+                    ? "Save changes"
+                    : "Create product"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -1122,15 +1085,6 @@ export default function AdminProductsPage() {
                   <h4 className="mt-2 text-2xl font-semibold text-white">
                     {detailsProduct.name}
                   </h4>
-                </div>
-
-                <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5">
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                    Image URL
-                  </p>
-                  <p className="mt-2 break-all text-sm text-slate-300">
-                    {detailsProduct.image_url || "No image set"}
-                  </p>
                 </div>
 
                 <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5">

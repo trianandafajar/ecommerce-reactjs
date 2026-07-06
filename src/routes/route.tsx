@@ -12,13 +12,13 @@ const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const VerifyOtpPage = lazy(() => import("@/pages/VerifyOtpPage"));
-const CreateProductPage = lazy(() => import("@/pages/CreateProductPage"));
 const ProductsPage = lazy(() => import("@/pages/ProductsPage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const AdminOverviewPage = lazy(() => import("@/pages/admin/AdminOverviewPage"));
 const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"));
 const AdminCustomersPage = lazy(() => import("@/pages/admin/AdminCustomersPage"));
 const AdminProductsPage = lazy(() => import("@/pages/admin/AdminProductsPage"));
+const AdminProductFormPage = lazy(() => import("@/pages/admin/AdminProductFormPage"));
 const AdminReportsPage = lazy(() => import("@/pages/admin/AdminReportsPage"));
 
 import { productDetailLoader } from "@/routes/productLoader";
@@ -85,8 +85,10 @@ export const router = createBrowserRouter([
               { path: "orders", element: <AdminOrdersPage /> },
               { path: "customers", element: <AdminCustomersPage /> },
               { path: "products", element: <AdminProductsPage /> },
+              { path: "products/new", element: <AdminProductFormPage /> },
+              { path: "products/:productId/edit", element: <AdminProductFormPage /> },
               { path: "reports", element: <AdminReportsPage /> },
-              { path: "product/create", element: <CreateProductPage /> },
+              { path: "product/create", element: <Navigate to="/admin/products/new" replace /> },
             ],
           },
           {

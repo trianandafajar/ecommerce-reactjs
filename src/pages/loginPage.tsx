@@ -48,8 +48,13 @@ export default function LoginPage() {
     const result = await dispatch(loginThunk({ email, password }));
 
     if (loginThunk.fulfilled.match(result)) {
-      await dispatch(fetchCurrentUserThunk());
-      navigate("/"); 
+      const currentUserResult = await dispatch(fetchCurrentUserThunk());
+      const role =
+        loginThunk.fulfilled.match(result)
+          ? result.payload?.user?.role ?? (fetchCurrentUserThunk.fulfilled.match(currentUserResult) ? currentUserResult.payload?.role : undefined)
+          : undefined;
+
+      navigate(role === "admin" ? "/admin" : "/");
     }
   };
 
