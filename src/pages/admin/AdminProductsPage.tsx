@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
-  ArrowUpRight,
   Filter,
   ImageIcon,
   PencilLine,
@@ -218,57 +217,6 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
-function ProductCardPreview({ product }: { product: ProductPreview }) {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-slate-800 bg-[#0b1322]">
-      <div className="relative aspect-[4/3] overflow-hidden border-b border-slate-800 bg-slate-950">
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-slate-600">
-            <ImageIcon className="h-10 w-10" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
-      </div>
-      <div className="space-y-4 p-5">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500">
-            Preview
-          </p>
-          <h4 className="mt-2 text-xl font-semibold text-white">{product.name}</h4>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-[#00A9AA]/30 bg-[#00A9AA]/10 px-3 py-1 text-xs font-medium text-[#00A9AA]">
-            {product.category || "Uncategorized"}
-          </span>
-          <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300">
-            {formatMoney(product.price)}
-          </span>
-        </div>
-
-        <div
-          className="space-y-3 text-sm leading-6 text-slate-300"
-          dangerouslySetInnerHTML={{
-            __html:
-              formatMarkdown(product.description) ||
-              '<p class="text-sm text-slate-500">No description yet.</p>',
-          }}
-        />
-
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 text-xs uppercase tracking-[0.3em] text-slate-500">
-          Updated {formatUpdatedAt(product.updated_at || product.created_at)}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -309,6 +257,20 @@ export default function AdminProductsPage() {
 
     return form.selectedCategory.trim();
   }, [form.categoryMode, form.customCategory, form.selectedCategory]);
+
+  const previewProduct: ProductPreview = {
+    id: currentProduct?.id ?? "preview",
+    name: form.name || "Preview product",
+    price: Number(form.price) || 0,
+    image_url: form.imageUrl || null,
+    category:
+      form.categoryMode === "custom"
+        ? form.customCategory || "Custom"
+        : form.selectedCategory || "Uncategorized",
+    description: form.description || "",
+    created_at: currentProduct?.created_at,
+    updated_at: currentProduct?.updated_at,
+  };
 
   const activeFilterCount =
     (debouncedSearch.trim() ? 1 : 0) + (categoryFilter !== "all" ? 1 : 0);
@@ -596,35 +558,16 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] border border-slate-800 bg-[#10192d]">
-        <div className="flex flex-col gap-5 border-b border-slate-800 p-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.35em] text-[#00A9AA]">
-              Catalog control
+      <section className="overflow-hidden rounded-md border border-slate-700 bg-[#10192d]">
+        <div className="flex flex-col gap-3 border-b border-slate-700 p-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="mt-2 text-lg font-semibold text-white">Products</h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Manage the live catalog from the FastAPI backend.
             </p>
-            <div className="space-y-2">
-              <h3 className="text-3xl font-semibold text-white">Products</h3>
-              <p className="max-w-2xl text-sm leading-6 text-slate-400">
-                Real products from the FastAPI backend. Search by name or category, inspect
-                live details, and edit the catalog from one place.
-              </p>
-            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <div className="rounded-full border border-slate-800 bg-slate-950/60 px-4 py-2 text-sm text-slate-300">
-              {pagination.total} results
-            </div>
-            <div className="rounded-full border border-slate-800 bg-slate-950/60 px-4 py-2 text-sm text-slate-300">
-              {categories.length} categories
-            </div>
-            <Button
-              variant="outline"
-              className="rounded-full border-slate-700 bg-transparent text-white hover:bg-white/5"
-            >
-              Export
-              <ArrowUpRight className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={openCreateDialog}
               className="rounded-full bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]"
@@ -635,7 +578,7 @@ export default function AdminProductsPage() {
           </div>
         </div>
 
-        <div className="border-b border-slate-800 bg-[#0d1526] px-6 py-5">
+        <div className="border-b border-slate-700 bg-[#0d1526] px-5 py-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:flex-nowrap xl:items-end xl:gap-3">
             <div className="space-y-2 min-w-0 xl:flex-[2.8_1_0%]">
               <label className="text-xs uppercase tracking-[0.25em] text-slate-500">
@@ -740,7 +683,7 @@ export default function AdminProductsPage() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-800 bg-[#0f172a] hover:bg-[#0f172a]">
+                  <TableRow className="border-slate-700 bg-[#0f172a] hover:bg-[#0f172a]">
                     <TableHead className="text-slate-300">Product</TableHead>
                     <TableHead className="text-slate-300">Category</TableHead>
                     <TableHead className="text-slate-300">Price</TableHead>
@@ -752,7 +695,7 @@ export default function AdminProductsPage() {
                   {products.map((product) => (
                     <TableRow
                       key={product.id}
-                      className="border-slate-800 hover:bg-white/[0.035]"
+                      className="border-slate-700 hover:bg-white/[0.035]"
                     >
                       <TableCell className="font-medium text-white">
                         <div className="flex items-center gap-3">
@@ -773,7 +716,7 @@ export default function AdminProductsPage() {
                             <p className="truncate text-sm font-semibold text-white">
                               {product.name}
                             </p>
-                            <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                            <p className="mt-1 line-clamp-1 max-w-[26rem] text-xs text-slate-500">
                               {stripMarkdown(product.description) || "No description yet."}
                             </p>
                           </div>
@@ -827,7 +770,7 @@ export default function AdminProductsPage() {
               </Table>
             </div>
 
-            <div className="border-t border-slate-800 bg-[#0d1526] px-6 py-4">
+            <div className="border-t border-slate-700 bg-[#0d1526] px-5 py-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-sm text-slate-400">
                   Showing {showingFrom}-{showingTo} of {pagination.total} products
@@ -903,177 +846,225 @@ export default function AdminProductsPage() {
       </section>
 
       <Dialog open={dialogMode !== null} onOpenChange={(open) => (!open ? closeFormDialog() : null)}>
-        <DialogContent className="max-w-[min(96vw,1120px)]">
-          <DialogHeader className="pr-12">
-            <DialogTitle>
-              {dialogMode === "edit" ? "Edit product" : "Add product"}
-            </DialogTitle>
-            <DialogDescription>
-              Keep the product aligned with the live catalog. The editor below stores
-              simple markdown so descriptions stay easy to manage.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="h-[92vh] w-[96vw] max-w-[1280px] overflow-hidden border-slate-800 bg-[#10192d] p-0 text-white shadow-2xl shadow-black/50">
+          <div className="flex h-full flex-col">
+            <div className="shrink-0 border-b border-slate-800 bg-[#0b1322] px-7 py-5">
+              <DialogHeader className="pr-12">
+                <DialogTitle className="text-xl font-semibold text-white">
+                  {dialogMode === "edit" ? "Edit product" : "Add product"}
+                </DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-slate-400">
+                  Add product details, pricing, category, image, and description.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
 
-          <form className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]" onSubmit={handleSubmit}>
-            <div className="space-y-5">
-              {formError ? (
-                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                  {formError}
+            <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+              <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(380px,0.8fr)]">
+                <div className="min-h-0 overflow-y-auto px-7 py-6 lg:border-r lg:border-slate-800">
+                  <div className="mx-auto max-w-3xl space-y-6">
+                    {formError ? (
+                      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                        {formError}
+                      </div>
+                    ) : null}
+
+                    <div className="rounded-3xl border border-slate-800 bg-[#0b1322]/70 p-5">
+                      <div className="mb-5">
+                        <h3 className="mt-2 text-lg font-semibold text-white">
+                          Basic information
+                        </h3>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2 sm:col-span-2">
+                          <label className="text-sm text-slate-300">Product name</label>
+                          <Input
+                            value={form.name}
+                            onChange={(event) =>
+                              setForm((prev) => ({ ...prev, name: event.target.value }))
+                            }
+                            placeholder="Enter product name"
+                            className="h-12 rounded-xl border-slate-700 bg-[#111b30] text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm text-slate-300">Price</label>
+                          <Input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={form.price}
+                            onChange={(event) =>
+                              setForm((prev) => ({ ...prev, price: event.target.value }))
+                            }
+                            placeholder="0"
+                            className="h-12 rounded-xl border-slate-700 bg-[#111b30] text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm text-slate-300">Image URL</label>
+                          <Input
+                            type="url"
+                            value={form.imageUrl}
+                            onChange={(event) =>
+                              setForm((prev) => ({ ...prev, imageUrl: event.target.value }))
+                            }
+                            placeholder="https://example.com/product.jpg"
+                            className="h-12 rounded-xl border-slate-700 bg-[#111b30] text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm text-slate-300">Category</label>
+                          <Select
+                            value={form.categoryMode === "custom" ? "__custom__" : form.selectedCategory}
+                            onValueChange={(value) => {
+                              if (value === "__custom__") {
+                                setForm((prev) => ({
+                                  ...prev,
+                                  categoryMode: "custom",
+                                  customCategory: prev.customCategory || prev.selectedCategory,
+                                }));
+                                return;
+                              }
+
+                              setForm((prev) => ({
+                                ...prev,
+                                categoryMode: "preset",
+                                selectedCategory: value,
+                                customCategory: "",
+                              }));
+                            }}
+                          >
+                            <SelectTrigger className="h-12 min-h-12 w-full rounded-xl border-slate-700 bg-[#111b30] text-sm text-white data-[size=default]:!h-12 data-[size=sm]:!h-12 focus:ring-[#00A9AA]/30">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent className="border-slate-800 bg-[#0b1322] text-white">
+                              {categories.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="__custom__">Custom category</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {form.categoryMode === "custom" ? (
+                          <div className="space-y-2">
+                            <label className="text-sm text-slate-300">Custom category</label>
+                            <Input
+                              value={form.customCategory}
+                              onChange={(event) =>
+                                setForm((prev) => ({ ...prev, customCategory: event.target.value }))
+                              }
+                              placeholder="Type a new category"
+                              className="h-12 rounded-xl border-slate-700 bg-[#111b30] text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl border border-slate-800 bg-[#0b1322]/70 p-5">
+                      <MarkdownEditor
+                        label="Description"
+                        value={form.description}
+                        onChange={(value) => setForm((prev) => ({ ...prev, description: value }))}
+                        placeholder="Write a short product description..."
+                      />
+                    </div>
+                  </div>
                 </div>
-              ) : null}
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm text-slate-300">Product name</label>
-                  <Input
-                    value={form.name}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, name: event.target.value }))
-                    }
-                    placeholder="Enter product name"
-                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
-                  />
-                </div>
+                <div className="min-h-0 overflow-y-auto bg-[#0b1322]/70 px-7 py-6">
+                  <div className="sticky top-0 space-y-5">
+                    <div className="overflow-hidden rounded-3xl border border-slate-800 bg-[#10192d] shadow-xl shadow-black/20">
+                      <div className="aspect-[16/10] bg-slate-950">
+                        {previewProduct.image_url ? (
+                          <img
+                            src={previewProduct.image_url}
+                            alt={previewProduct.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-slate-600">
+                            <ImageIcon className="h-14 w-14" />
+                          </div>
+                        )}
+                      </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-300">Price</label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={form.price}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, price: event.target.value }))
-                    }
-                    placeholder="0"
-                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
-                  />
-                </div>
+                      <div className="space-y-4 border-t border-slate-800 p-5">
+                        <div className="flex flex-wrap gap-2">
+                          <span className="rounded-full border border-[#00A9AA]/30 bg-[#00A9AA]/10 px-3 py-1 text-xs font-medium text-[#00A9AA]">
+                            {previewProduct.category || "Uncategorized"}
+                          </span>
+                          <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-medium text-slate-300">
+                            {formatMoney(previewProduct.price)}
+                          </span>
+                        </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-300">Image URL</label>
-                  <Input
-                    type="url"
-                    value={form.imageUrl}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, imageUrl: event.target.value }))
-                    }
-                    placeholder="https://example.com/product.jpg"
-                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
-                  />
-                </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                            Live preview
+                          </p>
+                          <h4 className="mt-2 text-2xl font-semibold leading-tight text-white">
+                            {previewProduct.name || "Preview product"}
+                          </h4>
+                        </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-300">Category</label>
-                  <Select
-                    value={form.categoryMode === "custom" ? "__custom__" : form.selectedCategory}
-                    onValueChange={(value) => {
-                      if (value === "__custom__") {
-                        setForm((prev) => ({
-                          ...prev,
-                          categoryMode: "custom",
-                          customCategory: prev.customCategory || prev.selectedCategory,
-                        }));
-                        return;
-                      }
+                        <div
+                          className="space-y-2 text-sm leading-6 text-slate-300"
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              formatMarkdown(previewProduct.description) ||
+                              '<p class="text-sm text-slate-500">No description yet.</p>',
+                          }}
+                        />
+                      </div>
+                    </div>
 
-                      setForm((prev) => ({
-                        ...prev,
-                        categoryMode: "preset",
-                        selectedCategory: value,
-                        customCategory: "",
-                      }));
-                    }}
-                  >
-                    <SelectTrigger className="h-11 min-h-11 w-full border-slate-800 bg-slate-950 text-sm text-white data-[size=default]:!h-11 data-[size=sm]:!h-11 focus:ring-[#00A9AA]/30">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-[#0b1322] text-white">
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__custom__">Custom category</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 text-sm text-slate-300">
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                        Quick notes
+                      </p>
+                      <ul className="mt-4 space-y-3">
+                        <li>Keep the image URL public and accessible.</li>
+                        <li>Use the markdown toolbar to emphasize key details.</li>
+                        <li>Category can use an existing option or a custom value.</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {form.categoryMode === "custom" ? (
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-300">Custom category</label>
-                  <Input
-                    value={form.customCategory}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, customCategory: event.target.value }))
-                    }
-                    placeholder="Type a new category"
-                    className="h-11 border-slate-800 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
-                  />
-                </div>
-              ) : null}
-
-              <MarkdownEditor
-                label="Description"
-                value={form.description}
-                onChange={(value) => setForm((prev) => ({ ...prev, description: value }))}
-                placeholder="Write a short product description..."
-              />
-            </div>
-
-            <div className="space-y-5">
-              <ProductCardPreview
-                product={{
-                  id: currentProduct?.id ?? "preview",
-                  name: form.name || "Preview product",
-                  price: Number(form.price) || 0,
-                  image_url: form.imageUrl || null,
-                  category:
-                    form.categoryMode === "custom"
-                      ? form.customCategory || "Custom"
-                      : form.selectedCategory || "Uncategorized",
-                  description: form.description || "",
-                  created_at: currentProduct?.created_at,
-                  updated_at: currentProduct?.updated_at,
-                }}
-              />
-
-              <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 text-sm text-slate-300">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                  Form hints
-                </p>
-                <ul className="mt-4 space-y-3">
-                  <li>• Keep the image URL public and accessible.</li>
-                  <li>• Use the markdown toolbar to highlight names or features.</li>
-                  <li>• Choose an existing category, or switch to custom for a new one.</li>
-                </ul>
-              </div>
-            </div>
-
-            <DialogFooter className="lg:col-span-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-slate-700 bg-transparent text-white hover:bg-white/5"
-                onClick={closeFormDialog}
-                disabled={submitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-slate-100 text-slate-950 hover:bg-white"
-                disabled={submitting}
-              >
-                {submitting
-                  ? "Saving..."
-                  : dialogMode === "edit"
-                    ? "Save changes"
-                    : "Create product"}
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter className="shrink-0 border-t border-slate-800 bg-[#0b1322] px-7 py-5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-slate-700 bg-transparent text-white hover:bg-white/5"
+                  onClick={closeFormDialog}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]"
+                  disabled={submitting}
+                >
+                  {submitting
+                    ? "Saving..."
+                    : dialogMode === "edit"
+                      ? "Save changes"
+                      : "Create product"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
 

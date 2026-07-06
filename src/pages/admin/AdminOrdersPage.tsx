@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
-import { ArrowUpRight, Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -669,13 +669,6 @@ export default function AdminOrdersPage(): JSX.Element {
               Manage customer orders and review current status.
             </p>
           </div>
-
-          <div className="flex gap-2">
-            <Button className="bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]">
-              Export
-              <ArrowUpRight className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
 
         <div className="border-b border-slate-700 bg-[#10192d] px-4 pb-5">
@@ -1020,7 +1013,7 @@ export default function AdminOrdersPage(): JSX.Element {
                 </div>
               ) : orderDetail ? (
                 <div className="grid h-full min-h-0 grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px]">
-                  <main className="min-h-0 overflow-y-auto px-8 py-6">
+                  <main className="min-h-0 overflow-y-auto px-8 py-6 no-scrollbar">
                     <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                       {[
                         ["Customer", getCustomerName(orderDetail)],

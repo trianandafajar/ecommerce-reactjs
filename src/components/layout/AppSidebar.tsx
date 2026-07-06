@@ -4,7 +4,6 @@ import {
   ChevronDownIcon,
   Ellipsis,
   GridIcon,
-  PackageIcon,
   TableIcon,
   UserCircleIcon,
 } from "lucide-react";
@@ -55,14 +54,6 @@ const navItems: NavItem[] = [
   },
 ];
 
-const othersItems: NavItem[] = [
-  {
-    icon: <PackageIcon />,
-    name: "Back to Store",
-    subItems: [{ name: "Store Home", path: "/", pro: false }],
-  },
-];
-
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { pathname } = useLocation();
@@ -98,10 +89,8 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     let submenuMatched = false;
 
-    (["main", "others"] as MenuType[]).forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
-
-      items.forEach((nav, index) => {
+    (["main"] as MenuType[]).forEach((menuType) => {
+      navItems.forEach((nav, index) => {
         nav.subItems?.forEach((subItem) => {
           if (isActive(subItem.path)) {
             setOpenSubmenu({
@@ -331,24 +320,6 @@ const AppSidebar: React.FC = () => {
               </h2>
 
               {renderMenuItems(navItems, "main")}
-            </div>
-
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-white ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <Ellipsis className="w-5 h-5" />
-                )}
-              </h2>
-
-              {renderMenuItems(othersItems, "others")}
             </div>
           </div>
         </nav>
