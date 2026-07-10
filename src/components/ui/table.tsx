@@ -17,7 +17,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
-      className={cn("border-t bg-slate-950/40 font-medium [&>tr]:last:border-b-0", className)}
+      className={cn("border-t border-border bg-muted/60 font-medium [&>tr]:last:border-b-0", className)}
       {...props}
     />
   );
@@ -26,7 +26,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
-      className={cn("border-b border-slate-800 transition-colors hover:bg-slate-900/60", className)}
+      className={cn("border-b border-border transition-colors hover:bg-accent/60", className)}
       {...props}
     />
   );
@@ -36,7 +36,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       className={cn(
-        "h-12 px-4 text-left align-middle font-medium text-slate-400 [&:has([role=checkbox])]:pr-0",
+        "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
@@ -45,7 +45,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
 }
 
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
-  return <td className={cn("p-4 align-middle text-slate-200", className)} {...props} />;
+  return <td className={cn("p-4 align-middle text-foreground", className)} {...props} />;
 }
 
 export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell };

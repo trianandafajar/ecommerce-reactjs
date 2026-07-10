@@ -155,7 +155,7 @@ const AppSidebar: React.FC = () => {
               </span>
 
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text text-white">{nav.name}</span>
+                <span className="menu-item-text">{nav.name}</span>
               )}
 
               {(isExpanded || isHovered || isMobileOpen) && (
@@ -163,8 +163,8 @@ const AppSidebar: React.FC = () => {
                   className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
-                      ? "rotate-180 text-[#00A9AA]"
-                      : "text-slate-500"
+                      ? "rotate-180 text-primary"
+                      : "text-muted-foreground"
                   }`}
                 />
               )}
@@ -188,7 +188,7 @@ const AppSidebar: React.FC = () => {
                 </span>
 
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text text-white">{nav.name}</span>
+                  <span className="menu-item-text">{nav.name}</span>
                 )}
               </Link>
             )
@@ -212,7 +212,7 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
-                      className={`menu-dropdown-item text-white ${
+                      className={`menu-dropdown-item ${
                         isActive(subItem.path)
                           ? "menu-dropdown-item-active"
                           : "menu-dropdown-item-inactive"
@@ -258,7 +258,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-[#0f172a] dark:bg-gray-900 dark:border-gray-800 text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-background text-foreground h-screen transition-all duration-300 ease-in-out z-50 border-r border-border shadow-lg shadow-black/5 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -279,14 +279,14 @@ const AppSidebar: React.FC = () => {
         <Link to="/admin/dashboard">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center">
-              <img
+            <img
                 className=""
                 src="/icon.svg"
                 alt="App logo"
                 width={44}
                 height={44}
               />
-              <span className="ml-2 text-lg font-bold text-[#00A9AA]">
+              <span className="font-bold tracking-tighter text-transparent animate-gradient-x text-lg sm:tracking-widest bg-gradient-to-r from-primary via-cyan-400 to-primary bg-clip-text uppercase">
                 Keysthetix
               </span>
             </div>
@@ -306,7 +306,7 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-white ${
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-muted-foreground ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"

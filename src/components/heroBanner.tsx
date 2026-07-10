@@ -87,15 +87,15 @@ export function HeroBanner() {
 
   return (
     <section
-      className="relative w-full h-[520px] sm:h-[600px] lg:h-[650px] overflow-hidden bg-background border-b border-border"
+      className="relative w-full h-[480px] sm:h-[560px] lg:h-[620px] overflow-hidden border-b border-border bg-background"
       aria-label="Featured products banner"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 sm:left-1/4 sm:translate-x-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[100px] animate-float" />
-        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 sm:right-1/4 sm:translate-x-0 w-80 h-80 sm:w-[30rem] sm:h-[30rem] bg-cyan-400/10 rounded-full blur-[120px] animate-float-delayed" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent z-10" />
+        <div className="absolute top-1/3 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-primary/10 blur-[90px] sm:left-1/4 sm:h-80 sm:w-80 sm:translate-x-0" />
+        <div className="absolute bottom-1/3 right-1/2 h-64 w-64 translate-x-1/2 rounded-full bg-muted/70 blur-[100px] sm:right-1/4 sm:h-[28rem] sm:w-[28rem] sm:translate-x-0" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-background via-background/90 to-transparent" />
 
         <div
           className={slideTransitionClass}
@@ -137,22 +137,22 @@ export function HeroBanner() {
         <button
           onClick={goToPreviousSlide}
           aria-label="Previous slide"
-          className="group pointer-events-auto absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300 cursor-pointer"
+          className="group pointer-events-auto absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-background/80 backdrop-blur-md transition-colors duration-200 hover:bg-accent"
         >
-          <ChevronLeft className="h-6 w-6 text-white transition-transform duration-200 group-hover:-translate-x-0.5" />
+          <ChevronLeft className="h-5 w-5 text-foreground transition-transform duration-200 group-hover:-translate-x-0.5" />
         </button>
         <button
           onClick={goToNextSlide}
           aria-label="Next slide"
-          className="group pointer-events-auto absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-md bg-black/30 border border-white/20 hover:bg-cyan-400/90 hover:border-cyan-300 transition-all duration-300 cursor-pointer"
+          className="group pointer-events-auto absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-background/80 backdrop-blur-md transition-colors duration-200 hover:bg-accent"
         >
-          <ChevronRight className="h-6 w-6 text-white transition-transform duration-200 group-hover:translate-x-0.5" />
+          <ChevronRight className="h-5 w-5 text-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
         </button>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 flex flex-col items-center sm:items-start text-center sm:text-left gap-6 h-full justify-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
-          <Zap className={`w-4 h-4 fill-current ${prefersReducedMotion ? "" : "animate-pulse"}`} />
+      <div className="relative z-20 mx-auto flex h-full max-w-7xl flex-col justify-center gap-5 px-4 py-16 text-center sm:items-start sm:px-6 sm:text-left lg:px-8 lg:py-24">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
+          <Zap className={`h-4 w-4 fill-current ${prefersReducedMotion ? "" : "animate-pulse"}`} />
           <span key={`badge-${currentSlide}`}>
             {slides[currentSlide].badge}
           </span>
@@ -160,45 +160,51 @@ export function HeroBanner() {
 
         <h1
           key={`title-${currentSlide}`}
-          className={`text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-3xl ${prefersReducedMotion ? "" : "animate-in fade-in slide-in-from-bottom-4 duration-500"}`}
+          className={`max-w-3xl text-4xl font-semibold tracking-tight text-foreground md:text-6xl lg:text-6xl ${prefersReducedMotion ? "" : "animate-in fade-in slide-in-from-bottom-4 duration-500"}`}
         >
           {slides[currentSlide].title}
           <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">
+          <span className="text-primary">
             {slides[currentSlide].highlight}
           </span>
         </h1>
 
         <p
           key={`desc-${currentSlide}`}
-          className={`text-lg md:text-xl text-muted-foreground max-w-2xl mt-2 leading-relaxed line-clamp-3 ${prefersReducedMotion ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
+          className={`mt-1 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg ${prefersReducedMotion ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
         >
           {slides[currentSlide].description}
         </p>
 
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-6">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 sm:justify-start">
           <a
             href="#popular"
-            className="inline-flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-medium cursor-pointer rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 duration-200"
+            className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99]"
           >
             Shop Collection
-            <ArrowRight className="ml-2 w-5 h-5" />
+            <ArrowRight className="ml-2 h-4 w-4" />
           </a>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 lg:left-8 flex gap-2">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              aria-current={currentSlide === index}
-              className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === index
-                  ? "w-8 bg-primary"
-                  : "w-4 bg-muted hover:bg-muted-foreground"
+        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2 sm:left-6 sm:translate-x-0 lg:left-8">
+          {slides.map((_, index) => {
+            const isActive = currentSlide === index;
+
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setCurrentSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                aria-current={isActive}
+                className={`h-1.5 rounded-full transition-all duration-500 ease-in-out ${
+                  isActive
+                    ? "w-8 bg-primary"
+                    : "w-4 bg-border hover:bg-muted-foreground"
                 }`}
-            />
-          ))}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

@@ -14,7 +14,7 @@ function AdminShell() {
     : "lg:ml-[90px]";
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="admin-theme min-h-screen bg-background text-foreground xl:flex">
       <AppSidebar />
       <Backdrop />
       <div className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>

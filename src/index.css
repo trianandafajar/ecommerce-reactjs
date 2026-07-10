@@ -163,23 +163,23 @@
 }
 
 @utility menu-item-active {
-  @apply bg-[#00A9AA]/10 text-[#00A9AA] dark:bg-[#00A9AA]/15 dark:text-[#00A9AA];
+  @apply bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary;
 }
 
 @utility menu-item-inactive {
-  @apply text-white hover:bg-white/5 group-hover:text-white dark:text-white dark:hover:bg-white/5 dark:hover:text-white;
+  @apply text-muted-foreground hover:bg-accent hover:text-foreground dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground;
 }
 
 @utility menu-item-icon {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
+  @apply text-muted-foreground group-hover:text-foreground dark:text-muted-foreground;
 }
 
 @utility menu-item-icon-active {
-  @apply text-[#00A9AA] dark:text-[#00A9AA];
+  @apply text-primary dark:text-primary;
 }
 
 @utility menu-item-icon-inactive {
-  @apply text-white/70 group-hover:text-white dark:text-white/70 dark:group-hover:text-white;
+  @apply text-muted-foreground group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-foreground;
 }
 
 @utility menu-item-arrow {
@@ -187,11 +187,11 @@
 }
 
 @utility menu-item-arrow-active {
-  @apply rotate-180 text-[#00A9AA] dark:text-[#00A9AA];
+  @apply rotate-180 text-primary dark:text-primary;
 }
 
 @utility menu-item-arrow-inactive {
-  @apply text-white/70 group-hover:text-white dark:text-white/70 dark:group-hover:text-white;
+  @apply text-muted-foreground group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-foreground;
 }
 
 @utility menu-dropdown-item {
@@ -199,23 +199,23 @@
 }
 
 @utility menu-dropdown-item-active {
-  @apply bg-[#00A9AA]/10 text-[#00A9AA] dark:bg-[#00A9AA]/15 dark:text-[#00A9AA];
+  @apply bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary;
 }
 
 @utility menu-dropdown-item-inactive {
-  @apply text-white hover:bg-white/5 dark:text-white dark:hover:bg-white/5;
+  @apply text-muted-foreground hover:bg-accent hover:text-foreground dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground;
 }
 
 @utility menu-dropdown-badge {
-  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-[#00A9AA] dark:text-[#00A9AA];
+  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-primary dark:text-primary;
 }
 
 @utility menu-dropdown-badge-active {
-  @apply bg-[#00A9AA]/15 dark:bg-[#00A9AA]/20;
+  @apply bg-primary/15 dark:bg-primary/20;
 }
 
 @utility menu-dropdown-badge-inactive {
-  @apply bg-[#00A9AA]/10 group-hover:bg-[#00A9AA]/15 dark:bg-[#00A9AA]/10 dark:group-hover:bg-[#00A9AA]/20;
+  @apply bg-primary/10 group-hover:bg-primary/15 dark:bg-primary/10 dark:group-hover:bg-primary/20;
 }
 
 @utility no-scrollbar {
@@ -243,6 +243,70 @@
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #344054;
+}
+
+.admin-theme {
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 8%, transparent), transparent 28%),
+    radial-gradient(circle at bottom left, color-mix(in srgb, var(--primary) 5%, transparent), transparent 24%),
+    var(--background);
+}
+
+.admin-theme [class*="bg-slate-900"],
+.admin-theme [class*="bg-[#10192d]"],
+.admin-theme [class*="bg-[#121d33]"] {
+  background-color: var(--card);
+}
+
+.admin-theme [class*="bg-slate-950"],
+.admin-theme [class*="bg-[#0f172a]"],
+.admin-theme [class*="bg-[#0d1526]"],
+.admin-theme [class*="bg-[#0b1322]"],
+.admin-theme [class*="bg-[#070d18]"],
+.admin-theme [class*="bg-[#111b30]"],
+.admin-theme [class*="bg-[#0f1729]"],
+.admin-theme [class*="bg-slate-950/70"] {
+  background-color: var(--muted);
+}
+
+.admin-theme [class*="border-slate-700"],
+.admin-theme [class*="border-slate-800"],
+.admin-theme [class*="border-gray-200"] {
+  border-color: var(--border);
+}
+
+.admin-theme [class*="bg-white/5"] {
+  background-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.admin-theme [class*="hover:bg-white/5"]:hover {
+  background-color: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.admin-theme [class*="bg-white/[0.035]"] {
+  background-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.admin-theme [class*="bg-black/30"] {
+  background-color: color-mix(in srgb, var(--foreground) 14%, transparent);
+}
+
+.admin-theme [class*="bg-black/50"] {
+  background-color: color-mix(in srgb, var(--foreground) 24%, transparent);
+}
+
+.admin-theme .text-white {
+  color: var(--foreground);
+}
+
+.admin-theme .text-slate-100,
+.admin-theme .text-slate-200,
+.admin-theme .text-slate-300,
+.admin-theme .text-slate-400,
+.admin-theme .text-slate-500,
+.admin-theme .text-slate-600 {
+  color: var(--muted-foreground);
 }
 
 

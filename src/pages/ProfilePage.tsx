@@ -80,65 +80,65 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-md border border-slate-800 bg-slate-900 p-6">
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-slate-700 bg-slate-950 text-xl font-semibold text-[#00A9AA]">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-xl font-semibold text-primary">
             {getInitials(profileName)}
           </div>
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.32em] text-slate-500">Profile</p>
-            <h1 className="truncate text-2xl font-semibold text-white">{profileName}</h1>
-            {profileEmail ? <p className="truncate text-sm text-slate-400">{profileEmail}</p> : null}
+            <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Profile</p>
+            <h1 className="truncate text-2xl font-semibold text-foreground">{profileName}</h1>
+            {profileEmail ? <p className="truncate text-sm text-muted-foreground">{profileEmail}</p> : null}
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {error ? (
-            <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-700 dark:text-rose-200">
               {error}
             </div>
           ) : null}
           {message ? (
-            <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-200">
               {message}
             </div>
           ) : null}
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.28em] text-slate-500">Name</label>
+              <label className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Name</label>
               <Input
                 value={form.name}
                 onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
                 placeholder="Your name"
-                className="h-11 rounded-md border-slate-700 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                className="h-11 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.28em] text-slate-500">Email</label>
+              <label className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Email</label>
               <Input
                 type="email"
                 value={form.email}
                 onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
                 placeholder="Your email"
-                className="h-11 rounded-md border-slate-700 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+                className="h-11 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.28em] text-slate-500">Phone</label>
+            <label className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Phone</label>
             <Input
               value={form.phone}
               onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
               placeholder="Your phone number"
-              className="h-11 rounded-md border-slate-700 bg-slate-950 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
+              className="h-11 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
             />
           </div>
 
           <div className="flex items-center justify-end pt-1">
-            <Button type="submit" className="bg-[#00A9AA] text-slate-950 hover:bg-[#00b8b9]" disabled={saving}>
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={saving}>
               {saving ? "Saving..." : "Save changes"}
             </Button>
           </div>

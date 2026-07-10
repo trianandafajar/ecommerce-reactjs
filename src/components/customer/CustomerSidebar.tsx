@@ -17,7 +17,7 @@ export default function CustomerSidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-slate-800 bg-slate-950 px-4 text-white transition-all duration-300 ease-in-out
+      className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border bg-card px-4 text-foreground transition-all duration-300 ease-in-out
         ${isExpanded || isMobileOpen || isHovered ? "w-[280px]" : "w-[84px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -29,7 +29,7 @@ export default function CustomerSidebar() {
           <img src="/icon.svg" alt="Keysthetix logo" className="h-11 w-11 shrink-0" />
           {(isExpanded || isHovered || isMobileOpen) && (
             <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-white">Keysthetix</p>
+              <p className="truncate text-base font-semibold text-foreground">Keysthetix</p>
             </div>
           )}
         </Link>
@@ -37,7 +37,7 @@ export default function CustomerSidebar() {
 
       <div className="flex flex-1 flex-col overflow-y-auto pb-6">
         <nav className="mt-2">
-          <p className={`mb-3 px-3 text-[11px] uppercase tracking-[0.3em] text-slate-500 ${!isExpanded && !isHovered ? "text-center" : ""}`}>
+          <p className={`mb-3 px-3 text-[11px] uppercase tracking-[0.3em] text-muted-foreground ${!isExpanded && !isHovered ? "text-center" : ""}`}>
             {(isExpanded || isHovered || isMobileOpen) ? "Menu" : <ChevronDownIcon className="mx-auto h-4 w-4" />}
           </p>
 
@@ -51,7 +51,7 @@ export default function CustomerSidebar() {
                   <Link
                     to={item.path}
                     className={`flex items-center gap-3 rounded-md border px-3 py-3 text-sm transition-colors
-                      ${active ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-200" : "border-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-900 hover:text-white"}
+                      ${active ? "border-primary/20 bg-primary/10 text-primary" : "border-transparent text-muted-foreground hover:border-border hover:bg-accent hover:text-foreground"}
                       ${!isExpanded && !isHovered ? "justify-center" : "justify-start"}`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />

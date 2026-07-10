@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { ArrowRight, Filter, PackageSearch, Search, X } from "lucide-react";
 import { GET } from "@/lib/api";
 import type { StandardResponse, PaginationMeta } from "@/types/api";
 import type { Order } from "@/features/order/types/order";
@@ -9,6 +10,16 @@ import {
   getOrderStatusLabel,
   getOrderStatusTone,
 } from "@/features/order/helper/customerOrderUi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -16,11 +27,73 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, ArrowUpDown, PackageSearch } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const DEFAULT_PAGE_SIZE = 10;
+
+function formatPaymentMethod(value?: string | null) {
+  if (!value) return "-";
+  return value
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function HistoryTableSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-b border-border p-5">
+        <Skeleton className="h-6 w-44 bg-muted" />
+        <Skeleton className="mt-2 h-4 w-72 bg-muted" />
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="border-b border-border text-left text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            <tr>
+              {["Order", "Status", "Payment", "Total", "Updated", "Action"].map((label) => (
+                <th key={label} className="px-5 py-3">
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <tr key={index}>
+                <td className="px-5 py-5">
+                  <Skeleton className="h-4 w-36 bg-muted" />
+                  <Skeleton className="mt-2 h-3 w-24 bg-muted" />
+                </td>
+                <td className="px-5 py-5">
+                  <Skeleton className="h-6 w-24 rounded-full bg-muted" />
+                </td>
+                <td className="px-5 py-5">
+                  <Skeleton className="h-4 w-28 bg-muted" />
+                </td>
+                <td className="px-5 py-5">
+                  <Skeleton className="h-4 w-24 bg-muted" />
+                </td>
+                <td className="px-5 py-5">
+                  <Skeleton className="h-4 w-28 bg-muted" />
+                </td>
+                <td className="px-5 py-5">
+                  <Skeleton className="h-9 w-24 rounded-full bg-muted" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export default function CustomerHistoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,28 +113,17 @@ export default function CustomerHistoryPage() {
   const page = Number(searchParams.get("page") ?? "1") || 1;
   const perPage = Number(searchParams.get("per_page") ?? `${DEFAULT_PAGE_SIZE}`) || DEFAULT_PAGE_SIZE;
 
-  const formatPaymentMethod = (value?: string | null) => {
-    if (!value) return "-";
-    return value
-      .replaceAll("_", " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const nextSearch = searchInput.trim();
       const currentSearch = searchParams.get("search") ?? "";
-      if (nextSearch === currentSearch) {
-        return;
-      }
+
+      if (nextSearch === currentSearch) return;
 
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);
-        if (nextSearch) {
-          nextParams.set("search", nextSearch);
-        } else {
-          nextParams.delete("search");
-        }
+        if (nextSearch) nextParams.set("search", nextSearch);
+        else nextParams.delete("search");
         nextParams.set("page", "1");
         nextParams.set("kind", "history");
         return nextParams;
@@ -98,6 +160,7 @@ export default function CustomerHistoryPage() {
         const meta = response.metadata?.pagination as
           | (PaginationMeta & { total_pages?: number })
           | undefined;
+
         if (meta) {
           setPagination({
             page: meta.page ?? page,
@@ -143,160 +206,228 @@ export default function CustomerHistoryPage() {
     setSearchParams(nextParams);
   };
 
+  const resetFilters = () => {
+    setSearchInput("");
+    const nextParams = new URLSearchParams();
+    nextParams.set("page", "1");
+    nextParams.set("per_page", String(DEFAULT_PAGE_SIZE));
+    nextParams.set("kind", "history");
+    setSearchParams(nextParams);
+  };
+
+  const activeFilterCount = searchInput.trim() ? 1 : 0;
+  const showingFrom = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.per_page + 1;
+  const showingTo =
+    pagination.total === 0 ? 0 : Math.min(pagination.page * pagination.per_page, pagination.total);
+
   return (
     <div className="space-y-6">
-      <section className="rounded-md border border-slate-800 bg-slate-900 p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-2xl border border-border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border p-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-slate-500">Order history</p>
-            <h1 className="mt-2 text-3xl font-semibold text-white">Completed and past orders.</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
-              All orders other than pending appear on this page.
+            <h3 className="text-lg font-semibold text-foreground">Order History</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Past and completed orders live here in the same table style as customer management.
             </p>
           </div>
+
           <Link to="/products">
-            <Button className="rounded-md bg-cyan-400 text-slate-950 hover:bg-cyan-300">
-              <PackageSearch className="mr-2 h-4 w-4" />
+            <Button variant="outline" className="border-border bg-background text-foreground hover:bg-accent">
+              <PackageSearch className="h-4 w-4" />
               Continue shopping
             </Button>
           </Link>
         </div>
-      </section>
 
-      <section className="rounded-md border border-slate-800 bg-slate-900 p-5">
-        <div className="grid gap-3 xl:grid-cols-[1.5fr_0.6fr]">
-          <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.25em] text-slate-500">Search</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <Input
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Order ID, address, city, or phone..."
-                className="h-11 rounded-md border-slate-700 bg-slate-950 pl-10 text-white placeholder:text-slate-500 focus-visible:ring-[#00A9AA]/30"
-              />
+        <div className="border-b border-border bg-background px-5 py-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:flex-nowrap xl:items-end xl:gap-3">
+            <div className="space-y-2 min-w-0 xl:flex-[2.6_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                Search
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder="Order ID, address, city, or phone..."
+                  className="h-11 min-h-11 border-border bg-background pl-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
+                />
+                {searchInput.trim() ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+                    onClick={() => setSearchInput("")}
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="space-y-2 min-w-0 xl:flex-[1_1_0%]">
+              <label className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                Per page
+              </label>
+              <Select
+                value={String(perPage)}
+                onValueChange={(value) => handlePerPageChange(value)}
+              >
+                <SelectTrigger className="h-11 min-h-11 w-full border-border bg-background text-sm text-foreground data-[size=default]:!h-11 data-[size=sm]:!h-11 focus:ring-primary/30">
+                  <SelectValue placeholder="10" />
+                </SelectTrigger>
+                <SelectContent className="border-border bg-card text-foreground">
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-end xl:shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full border-border bg-background px-5 text-foreground hover:bg-accent xl:w-auto"
+                onClick={resetFilters}
+                disabled={activeFilterCount === 0}
+              >
+                <Filter className="h-4 w-4" />
+                Clear filters
+              </Button>
             </div>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.25em] text-slate-500">Per page</label>
-            <select
-              value={String(perPage)}
-              onChange={(event) => handlePerPageChange(event.target.value)}
-              className="h-11 w-full rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none"
-            >
-              {[5, 10, 20].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
+        {error ? (
+          <div className="border-b border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-700 dark:text-rose-200">
+            {error}
           </div>
-        </div>
-      </section>
+        ) : null}
 
-      {error ? (
-        <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-          {error}
-        </div>
-      ) : null}
-
-      <section className="rounded-md border border-slate-800 bg-slate-900">
-        <div className="overflow-hidden rounded-md">
+        {loading && items.length === 0 ? (
+          <HistoryTableSkeleton />
+        ) : (
+          <div className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-800">
-              <thead className="bg-slate-950 text-left text-xs uppercase tracking-[0.25em] text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Order</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Payment</th>
-                  <th className="px-4 py-3">Total</th>
-                  <th className="px-4 py-3">Updated</th>
-                  <th className="px-4 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800 bg-slate-900">
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-400">
-                      Loading history...
-                    </td>
-                  </tr>
-                ) : items.length ? (
-                  items.map((order) => (
-                    <tr key={order.id}>
-                      <td className="px-4 py-4">
-                        <p className="font-mono text-sm text-white">{order.id}</p>
-                        <p className="mt-1 text-xs text-slate-500">{formatOrderDate(order.created_at)}</p>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-md border px-3 py-1 text-xs font-medium ${getOrderStatusTone(order.status)}`}>
+            <Table>
+              <TableHeader>
+                  <TableRow className="border-border bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="text-muted-foreground">Order</TableHead>
+                    <TableHead className="text-muted-foreground">Status</TableHead>
+                    <TableHead className="text-muted-foreground">Payment</TableHead>
+                    <TableHead className="text-muted-foreground">Total</TableHead>
+                    <TableHead className="text-muted-foreground">Updated</TableHead>
+                    <TableHead className="text-right text-muted-foreground">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="bg-card">
+                  {items.map((order) => (
+                    <TableRow key={order.id} className="border-border hover:bg-accent/50">
+                      <TableCell className="font-medium text-foreground">
+                        <p className="font-mono text-sm text-foreground">{order.id}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {formatOrderDate(order.created_at)}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full border px-3 py-1 text-xs font-medium",
+                            getOrderStatusTone(order.status),
+                          )}
+                        >
                           {getOrderStatusLabel(order.status)}
                         </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-300">
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
                         {formatPaymentMethod(order.payment_method)}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-300">
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
                         {formatOrderCurrency(order.total_amount)}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-400">
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
                         {formatOrderDate(order.updated_at ?? order.created_at)}
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <Link to={`/my/orders/${order.id}`} className="inline-flex items-center text-sm text-cyan-300 hover:text-cyan-200">
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link
+                          to={`/my/orders/${order.id}`}
+                          className="inline-flex items-center rounded-full border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+                        >
                           Track
-                          <ArrowUpDown className="ml-1 h-4 w-4" />
+                          <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">
-                      No history orders match the current filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
 
-        <div className="flex items-center justify-between gap-4 border-t border-slate-800 px-4 py-4">
-          <p className="text-sm text-slate-400">
-            Showing {items.length} of {pagination.total} orders
-          </p>
-          <Pagination className="mx-0 w-auto justify-end">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    if (pagination.has_prev) goToPage(page - 1);
-                  }}
-                  className={`${!pagination.has_prev ? "pointer-events-none opacity-50" : ""} border-slate-700 bg-slate-950 text-white hover:bg-slate-800`}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-cyan-300">
-                  {page}
-                </span>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    if (pagination.has_next) goToPage(page + 1);
-                  }}
-                  className={`${!pagination.has_next ? "pointer-events-none opacity-50" : ""} border-slate-700 bg-slate-950 text-white hover:bg-slate-800`}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+                  {!loading && !items.length ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                        {error
+                          ? "Unable to load history."
+                          : activeFilterCount > 0
+                            ? "No history orders match the current filters."
+                            : "No history orders available."}
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
+            </div>
+
+            {pagination.pages > 0 ? (
+              <div className="border-t border-border bg-background px-5 py-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {showingFrom}-{showingTo} of {pagination.total} orders
+                  </div>
+
+                  <Pagination className="mx-0 w-full justify-start sm:w-auto sm:justify-end">
+                    <PaginationContent className="w-full justify-start sm:w-auto sm:justify-end">
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          className={cn(
+                            "border-border bg-background text-foreground hover:bg-accent",
+                            !pagination.has_prev && "pointer-events-none opacity-50",
+                          )}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            if (pagination.has_prev) goToPage(page - 1);
+                          }}
+                        />
+                      </PaginationItem>
+
+                      <PaginationItem>
+                        <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-border bg-primary/10 px-3 text-sm text-primary">
+                          {page}
+                        </span>
+                      </PaginationItem>
+
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          className={cn(
+                            "border-border bg-background text-foreground hover:bg-accent",
+                            !pagination.has_next && "pointer-events-none opacity-50",
+                          )}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            if (pagination.has_next) goToPage(page + 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
       </section>
     </div>
   );

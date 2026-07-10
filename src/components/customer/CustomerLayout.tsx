@@ -14,7 +14,7 @@ function CustomerShell() {
       : "lg:ml-[84px]";
 
   return (
-    <div className="min-h-screen bg-slate-950 xl:flex">
+    <div className="min-h-screen bg-background text-foreground xl:flex">
       <CustomerSidebar />
       <Backdrop />
       <div className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>
@@ -34,4 +34,3 @@ export default function CustomerLayout() {
     </SidebarProvider>
   );
 }
-

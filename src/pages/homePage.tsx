@@ -66,23 +66,23 @@ export default function HomePage() {
 
       <div
         id="popular"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24"
+        className="mx-auto max-w-7xl scroll-mt-24 px-4 py-14 sm:px-6 lg:px-8 lg:py-16"
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-          <h2 className="text-3xl font-bold text-foreground capitalize text-center sm:text-left">
+        <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <h2 className="text-center text-3xl font-semibold capitalize text-foreground sm:text-left">
             {categoryFilter ? `${categoryFilter} Collection` : "Popular Products"}
           </h2>
           {categoryFilter ? (
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSearchParams({})}
-                className="text-sm font-medium text-red-500 hover:text-red-400 transition-colors"
+                className="text-sm font-medium text-red-500 transition-colors hover:text-red-400"
               >
                 Clear Filter
               </button>
               <Link
                 to={`/products?category=${categoryFilter}`}
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
               >
                 View All {categoryFilter}
               </Link>
@@ -90,7 +90,7 @@ export default function HomePage() {
           ) : (
             <Link
               to="/products"
-              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
             >
               View All
             </Link>

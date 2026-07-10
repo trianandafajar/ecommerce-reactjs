@@ -100,9 +100,11 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   }, [isAuthenticated, productCartItemCount, cartLoading, cart?.id, navigate, dispatch, product.id]);
 
   return (
-    <Link to={`/product/${product.id}`} className="bg-card group block border border-border rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/20 animate-in fade-in zoom-in duration-500 relative">
-      <div className="relative aspect-square bg-muted overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-primary/10 opacity-0 transition-opacity duration-700 group-hover:opacity-100 z-10" />
+    <Link
+      to={`/product/${product.id}`}
+      className="group relative block overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/5"
+    >
+      <div className="relative aspect-square overflow-hidden bg-muted">
         <img
           src={product.image_url || "/placeholder.svg"}
           alt={`${product.name} - Premium Mechanical Keyboard Component`}
@@ -111,7 +113,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
           loading="lazy"
           decoding="async"
           sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="w-full h-full object-cover transition-transform duration-700 absolute inset-0 z-0 group-hover:scale-110 group-hover:rotate-3"
+          className="absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
         <Button
           variant="ghost"
@@ -120,32 +122,31 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
             absolute top-3 right-3 z-30
             h-9 w-9
             rounded-full
-            bg-black/25
+            bg-background/80
             backdrop-blur-md
-            border border-white/20
-            hover:bg-black/40
-            transition-all duration-300
+            border border-border/80
+            hover:bg-background
+            transition-all duration-200
             cursor-pointer
-            shadow-lg
+            shadow-sm
           "
           onClick={handleHeartClick}
         >
           <Heart
             className={`
               w-4 h-4
-              text-white
-              drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]
-              transition-all duration-300
+              text-foreground
+              transition-all duration-200
               ${isBookmarked ? "fill-red-500 text-red-500 scale-110" : ""}
             `}
           />
         </Button>
       </div>
       <div className="p-4">
-        <h3 className="text-foreground font-medium mb-1 line-clamp-1 [text-overflow:clip] group-hover:text-primary transition-colors">
+        <h3 className="mb-1 line-clamp-1 font-medium text-foreground [text-overflow:clip] transition-colors group-hover:text-primary">
           {product.name}
         </h3>
-        <div className="flex items-center gap-1 mb-2 text-yellow-500">
+        <div className="mb-2 flex items-center gap-1 text-yellow-500">
           <Star className="w-3 h-3 fill-current" />
           <Star className="w-3 h-3 fill-current" />
           <Star className="w-3 h-3 fill-current" />
@@ -157,16 +158,16 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
           <p className="text-foreground font-semibold">
             {priceFormatter.format(product.price)}
           </p>
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+          <div className="translate-y-1 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
             <Button
               size="icon"
               variant="secondary"
-              className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 relative cursor-pointer hover:scale-110 active:scale-95 shadow-md hover:shadow-primary/50 transition-all duration-300"
+              className="relative h-8 w-8 cursor-pointer rounded-full bg-primary text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 active:scale-[0.98]"
               onClick={handleCartClick}
             >
               <ShoppingCart className="w-4 h-4" />
               {productCartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-[10px] text-background">
                   {productCartItemCount}
                 </span>
               )}
