@@ -2,12 +2,10 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { fetchCurrentUserThunk, loginThunk } from "@/features/auth/authThunks";
-import {
-  selectAuthError,
-  selectAuthLoading,
-} from "@/features/auth/authSlice";
+import { selectAuthError, selectAuthLoading } from "@/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("admin@gmail.com");
   const [password, setPassword] = useState("password");
@@ -17,7 +15,6 @@ export default function LoginPage() {
 
   const isLoading = useAppSelector(selectAuthLoading);
   const error = useAppSelector(selectAuthError);
-
   const [localError, setLocalError] = useState<string | null>(null);
 
   const validate = () => {
@@ -49,30 +46,37 @@ export default function LoginPage() {
 
     if (loginThunk.fulfilled.match(result)) {
       const currentUserResult = await dispatch(fetchCurrentUserThunk());
-      const role =
-        loginThunk.fulfilled.match(result)
-          ? result.payload?.user?.role ?? (fetchCurrentUserThunk.fulfilled.match(currentUserResult) ? currentUserResult.payload?.role : undefined)
-          : undefined;
+      const role = loginThunk.fulfilled.match(result)
+        ? result.payload?.user?.role ??
+          (fetchCurrentUserThunk.fulfilled.match(currentUserResult)
+            ? currentUserResult.payload?.role
+            : undefined)
+        : undefined;
 
       navigate(role === "admin" ? "/admin" : "/my");
     }
   };
 
   return (
-    <div className="flex items-center justify-center py-20 px-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-8 shadow-2xl shadow-primary/10 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-primary"></div>
-        
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to your NeoKeys account</p>
+    <div className="flex items-center justify-center px-4 py-20">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card shadow-sm animate-in fade-in slide-in-from-bottom-6 duration-500">
+        <div className="border-b border-border bg-muted/30 px-8 py-6">
+          <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
+            Keysthetix access
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+            Welcome back
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Sign in to continue shopping and tracking your orders.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
+        <form onSubmit={handleSubmit} className="space-y-5 p-8">
+          <div className="space-y-2">
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-foreground mb-1.5"
+              className="block text-sm font-medium text-muted-foreground"
             >
               Email Address
             </label>
@@ -81,16 +85,16 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm"
+              className="h-12 w-full rounded-2xl border-border bg-background px-4 text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-primary/30"
               placeholder="name@example.com"
               required
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-foreground mb-1.5"
+              className="block text-sm font-medium text-muted-foreground"
             >
               Password
             </label>
@@ -99,14 +103,14 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm"
+              className="h-12 w-full rounded-2xl border-border bg-background px-4 text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-primary/30"
               placeholder="••••••••"
               required
             />
           </div>
 
           {(error || localError) && (
-            <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded">
+            <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-3 text-center text-sm text-rose-700 dark:text-rose-200">
               {error || localError}
             </div>
           )}
@@ -114,30 +118,33 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-6 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="h-12 w-full rounded-2xl bg-primary font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90"
           >
             {isLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-border text-center space-y-4">
+        <div className="border-t border-border px-8 py-6 text-center space-y-4">
           <Link
             to="/auth/forgot-password"
-            className="block text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            className="block text-sm font-medium text-primary transition-colors hover:text-primary/80"
           >
             Forgot your password?
           </Link>
           <div className="text-sm text-muted-foreground">
-            Don’t have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               to="/auth/register"
-              className="font-medium text-primary hover:text-primary/80 transition-colors"
+              className="font-medium text-primary transition-colors hover:text-primary/80"
             >
               Register
             </Link>
           </div>
-          <Link to="/" className="inline-block mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to Shop
+          <Link
+            to="/"
+            className="inline-block mt-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            &larr; Back to Shop
           </Link>
         </div>
       </div>
