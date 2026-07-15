@@ -233,7 +233,7 @@ export default function AdminOverviewPage() {
 
       <section className="grid gap-4 xl:grid-cols-4">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-3">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
                 Revenue trend
@@ -295,7 +295,7 @@ export default function AdminOverviewPage() {
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm xl:col-span-1">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
                 Top category
@@ -423,7 +423,7 @@ export default function AdminOverviewPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
                 Recent orders

@@ -1,31 +1,32 @@
-import { memo, useState, useEffect, useCallback } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   Search,
   ShoppingBag,
-  Sun,
   User,
   UserRound,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { NavigationSidebar } from "@/components/navigationSidebar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { NavigationSidebar } from "@/components/navigationSidebar";
 import { SearchModal } from "@/components/searchModal";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectBookmarkCount } from "@/features/bookmark/bookmarkSlice";
-import { selectCartItemCount } from "@/features/cart/cartSlice";
 import { selectIsAuthenticated, selectUser } from "@/features/auth/authSlice";
 import { logoutThunk } from "@/features/auth/authThunks";
+import { selectBookmarkCount } from "@/features/bookmark/bookmarkSlice";
+import { selectCartItemCount } from "@/features/cart/cartSlice";
 import { selectSearchQuery } from "@/features/search/searchSlice";
+
+const SCROLL_THRESHOLD = 240;
 
 const SearchButtonLabel = memo(function SearchButtonLabel() {
   const searchQuery = useAppSelector(selectSearchQuery);
@@ -53,37 +54,86 @@ function getInitials(name?: string) {
 }
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(
-    () => localStorage.getItem("theme") !== "light",
-  );
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
-
-  const toggleDarkMode = useCallback(() => setIsDarkMode((prev) => !prev), []);
-  const openMenu = useCallback(() => setIsMenuOpen(true), []);
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
-  const openSearch = useCallback(() => setIsSearchOpen(true), []);
-  const closeSearch = useCallback(() => setIsSearchOpen(false), []);
-
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
   const bookmarkCount = useAppSelector(selectBookmarkCount);
   const cartItemCount = useAppSelector(selectCartItemCount);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
 
-  const dashboardPath = user?.role === "admin" ? "/admin/dashboard" : "/my/dashboard";
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(
+    () => typeof window !== "undefined" && window.scrollY > SCROLL_THRESHOLD,
+  );
+
+  const dashboardPath =
+    user?.role === "admin" ? "/admin/dashboard" : "/my/dashboard";
+
   const profilePath = user?.role === "admin" ? "/admin/profile" : "/my/profile";
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    root.classList.add("dark");
+
+    try {
+      localStorage.setItem("theme", "dark");
+    } catch {
+      // Keep the app in dark mode even if storage is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    let animationFrameId: number | null = null;
+
+    const updateHeaderState = () => {
+      animationFrameId = null;
+
+      const nextIsScrolled = window.scrollY > SCROLL_THRESHOLD;
+
+      setIsScrolled((currentValue) =>
+        currentValue === nextIsScrolled ? currentValue : nextIsScrolled,
+      );
+    };
+
+    const handleScroll = () => {
+      if (animationFrameId !== null) return;
+
+      animationFrameId = window.requestAnimationFrame(updateHeaderState);
+    };
+
+    updateHeaderState();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []);
+
+  const openMenu = useCallback(() => {
+    setIsMenuOpen(true);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const openSearch = useCallback(() => {
+    setIsSearchOpen(true);
+  }, []);
+
+  const closeSearch = useCallback(() => {
+    setIsSearchOpen(false);
+  }, []);
 
   const handleLogout = useCallback(() => {
     void dispatch(logoutThunk());
@@ -110,54 +160,63 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
+      <header
+        className={`sticky top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${
+          isScrolled
+            ? "border-b border-border/60 bg-background/88 shadow-sm shadow-black/5 backdrop-blur-xl"
+            : "border-b border-border/60 bg-background/88 shadow-sm shadow-black/5 backdrop-blur-xl sm:border-transparent sm:bg-transparent sm:shadow-none sm:backdrop-blur-none"
+        }`}
+      >
         <a
           href="#main-content"
-          className="sr-only rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50"
+          className="sr-only rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[60]"
         >
           Skip to content
         </a>
 
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-3 py-4 sm:px-6 md:px-8">
-          <div className="flex flex-1 items-center gap-2 sm:gap-3">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-3 py-4 sm:gap-4 sm:px-6 md:px-8">
+          <div className="flex flex-1 items-center gap-1 sm:gap-2">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={openMenu}
               aria-label="Open navigation menu"
               aria-expanded={isMenuOpen}
               aria-controls="navigation-sidebar"
-              className="relative flex h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-foreground hover:bg-accent hover:text-accent-foreground"
+              className="relative flex h-10 cursor-pointer items-center gap-2 rounded-full px-2.5 text-foreground hover:bg-accent/70 hover:text-accent-foreground sm:px-3"
             >
-              <Menu className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="hidden text-sm font-medium sm:inline">Menu</span>
+              <Menu className="size-4 shrink-0" aria-hidden="true" />
+
               {bookmarkCount > 0 && (
                 <span
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white"
+                  className="absolute right-1 top-1 flex size-3 items-center justify-center rounded-full bg-red-500 text-[8px] font-semibold leading-none text-white"
                   aria-label={`${bookmarkCount} bookmarks`}
                 >
-                  {bookmarkCount}
+                  {bookmarkCount > 99 ? "99+" : bookmarkCount}
                 </span>
               )}
             </Button>
 
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={openSearch}
               aria-label="Open search"
-              className="flex h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-foreground hover:bg-accent hover:text-accent-foreground"
+              className="flex h-10 cursor-pointer items-center gap-2 rounded-full px-2.5 text-foreground hover:bg-accent/70 hover:text-accent-foreground sm:px-3"
             >
-              <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <Search className="size-4 shrink-0" aria-hidden="true" />
+
               <SearchButtonLabel />
             </Button>
           </div>
 
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Link
               to="/"
               aria-label="Keysthetix Home"
-              className="cursor-pointer transition-opacity hover:opacity-80"
+              className="cursor-pointer transition-opacity duration-200 hover:opacity-75"
             >
               <span className="text-lg font-semibold tracking-[0.18em] text-foreground sm:text-2xl">
                 KEYSTHETIX
@@ -165,70 +224,58 @@ export function Header() {
             </Link>
           </div>
 
-          <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+          <div className="flex flex-1 items-center justify-end gap-0.5 sm:gap-1">
             <Button
+              type="button"
               variant="ghost"
-              size="sm"
-              className="h-10 cursor-pointer rounded-full px-3 text-foreground hover:bg-accent hover:text-accent-foreground"
-              onClick={toggleDarkMode}
-              aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              size="icon"
+              className="relative size-9 cursor-pointer rounded-full text-foreground hover:bg-accent/70 hover:text-accent-foreground"
+              asChild
             >
-              {isDarkMode ? (
-                <Sun className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <Moon className="h-4 w-4" aria-hidden="true" />
-              )}
-            </Button>
-
-            <Link to="/cart" aria-label={`Shopping cart, ${cartItemCount} items`}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="relative h-10 cursor-pointer rounded-full px-3 text-foreground hover:bg-accent hover:text-accent-foreground"
+              <Link
+                to="/cart"
+                aria-label={`Shopping cart, ${cartItemCount} items`}
+                title="Shopping cart"
               >
-                <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                <ShoppingBag className="size-5" aria-hidden="true" />
+
                 {cartItemCount > 0 && (
                   <span
-                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-xs text-background dark:bg-background dark:text-foreground"
+                    className="absolute right-1 top-1 flex size-3 items-center justify-center rounded-full bg-foreground text-[10px] font-semibold text-background"
                     aria-hidden="true"
                   >
-                    {cartItemCount}
+                    {cartItemCount > 99 ? "99+" : cartItemCount}
                   </span>
                 )}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
             {isAuthenticated ? (
               <Popover>
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-11 items-center gap-3 rounded-full border border-border bg-card px-3 text-left transition-colors hover:bg-accent/60 focus-visible:border-primary/50 focus-visible:bg-accent/60 focus-visible:outline-none"
+                    className="flex h-10 items-center gap-2 rounded-full  bg-transparent  px-1.5 pr-3 text-left transition-colors  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     aria-label="Open account menu"
+                    title={user?.name ?? "Account"}
                   >
-                    <Avatar className="h-8 w-8 border border-border bg-card">
+                    <Avatar className="size-8 border-2 border-primary/50">
                       <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                         {getInitials(user?.name)}
                       </AvatarFallback>
                     </Avatar>
-
-                    <div className="hidden min-w-0 text-left sm:block">
-                      <p className="max-w-[140px] truncate text-sm font-medium leading-none text-foreground">
-                        {user?.name ?? "User"}
-                      </p>
-                    </div>
                   </button>
                 </PopoverTrigger>
 
                 <PopoverContent
                   align="end"
                   sideOffset={10}
-                  className="w-80 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl shadow-black/10"
+                  className="w-72 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl shadow-black/10"
                 >
-                  <div className="border-b border-border bg-card p-5">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12 border border-border bg-background">
-                        <AvatarFallback className="bg-primary/10 text-base font-semibold text-primary">
+                  <div className="border-b border-border p-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-11 border border-primary/25 bg-transparent">
+                        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
                           {getInitials(user?.name)}
                         </AvatarFallback>
                       </Avatar>
@@ -237,7 +284,8 @@ export function Header() {
                         <p className="truncate text-sm font-medium text-foreground">
                           {user?.name ?? "User"}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">
+
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
                           {user?.email ?? "account@store.local"}
                         </p>
                       </div>
@@ -248,54 +296,57 @@ export function Header() {
                     <button
                       type="button"
                       onClick={handleProfile}
-                      className="flex h-14 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                      className="flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                        <UserRound className="h-4 w-4" />
+                      <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <UserRound className="size-4" />
                       </span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Profile</p>
-                      </div>
+
+                      <span className="text-sm font-medium text-foreground">
+                        Profile
+                      </span>
                     </button>
+
                     <button
                       type="button"
                       onClick={handleDashboard}
-                      className="flex h-14 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                      className="flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                        <LayoutDashboard className="h-4 w-4" />
+                      <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <LayoutDashboard className="size-4" />
                       </span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Dashboard</p>
-                      </div>
+
+                      <span className="text-sm font-medium text-foreground">
+                        Dashboard
+                      </span>
                     </button>
+
                     <div className="my-2 h-px bg-border" />
 
                     <Button
                       type="button"
                       variant="ghost"
-                      className="flex h-14 w-full justify-start gap-3 rounded-xl px-3 text-left text-sm font-semibold text-red-500 hover:bg-red-500/10 hover:text-red-600 focus-visible:bg-red-500/10 focus-visible:outline-none"
+                      className="flex h-12 w-full justify-start gap-3 rounded-xl px-3 text-left text-sm font-semibold text-red-500 hover:bg-red-500/10 hover:text-red-600 focus-visible:bg-red-500/10 focus-visible:outline-none"
                       onClick={handleLogout}
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
-                        <LogOut className="h-4 w-4" />
+                      <span className="flex size-9 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+                        <LogOut className="size-4" />
                       </span>
-                      <div>
-                        <p className="text-sm font-semibold">Logout</p>
-                      </div>
+
+                      <span>Logout</span>
                     </Button>
                   </div>
                 </PopoverContent>
               </Popover>
             ) : (
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 className="cursor-pointer px-1 text-foreground hover:bg-accent hover:text-accent-foreground sm:px-3"
                 onClick={() => navigate("/auth/login")}
               >
-                <User className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden text-xs font-semibold sm:inline">Login</span>
+                <User className="size-4" aria-hidden="true" />
               </Button>
             )}
           </div>
@@ -303,6 +354,7 @@ export function Header() {
       </header>
 
       <SearchModal isOpen={isSearchOpen} onClose={closeSearch} />
+
       <NavigationSidebar isOpen={isMenuOpen} onClose={closeMenu} />
     </>
   );

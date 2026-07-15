@@ -14,12 +14,12 @@ function AdminShell() {
     : "lg:ml-[90px]";
 
   return (
-    <div className="admin-theme min-h-screen bg-background text-foreground xl:flex">
+    <div className="admin-theme relative min-h-screen overflow-x-hidden bg-background text-foreground xl:flex">
       <AppSidebar />
       <Backdrop />
-      <div className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>
+      <div className={`min-w-0 flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>
         <AppHeader />
-        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+        <div className="mx-auto w-full max-w-(--breakpoint-2xl) p-4 sm:p-5 md:p-6">
           <Outlet />
         </div>
       </div>

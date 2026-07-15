@@ -17,7 +17,7 @@ export default function CustomerSidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border bg-card px-4 text-foreground transition-all duration-300 ease-in-out
+      className={`fixed left-0 top-0 z-50 flex h-[100dvh] flex-col overflow-y-auto overscroll-contain border-r border-border bg-card px-4 text-foreground transition-all duration-300 ease-in-out
         ${isExpanded || isMobileOpen || isHovered ? "w-[280px]" : "w-[84px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}

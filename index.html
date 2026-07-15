@@ -4,10 +4,12 @@
     <meta charset="UTF-8" />
 
     <script>
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage))) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
+      document.documentElement.classList.add("dark");
+
+      try {
+        localStorage.setItem("theme", "dark");
+      } catch (error) {
+        // Ignore storage failures and keep the app in dark mode.
       }
     </script>
 
@@ -42,8 +44,7 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
+    <meta name="theme-color" content="#0a0a0a" />
 
     <script type="application/ld+json">
     {

@@ -325,7 +325,7 @@ export default function CustomerDashboardPage() {
       </section>
 
       <section className="rounded-2xl border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-5">
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
               Featured products
@@ -390,7 +390,7 @@ export default function CustomerDashboardPage() {
       </section>
 
       <section className="rounded-2xl border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-5">
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.32em] text-muted-foreground">
               History preview

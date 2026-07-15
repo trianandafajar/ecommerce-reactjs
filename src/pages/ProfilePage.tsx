@@ -80,8 +80,8 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-4">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-xl font-semibold text-primary">
             {getInitials(profileName)}
           </div>
@@ -137,8 +137,12 @@ export default function ProfilePage() {
             />
           </div>
 
-          <div className="flex items-center justify-end pt-1">
-            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={saving}>
+          <div className="flex items-stretch justify-end pt-1 sm:items-center">
+            <Button
+              type="submit"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
+              disabled={saving}
+            >
               {saving ? "Saving..." : "Save changes"}
             </Button>
           </div>

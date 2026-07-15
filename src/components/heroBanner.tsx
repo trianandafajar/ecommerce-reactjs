@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Zap, ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Zap } from "lucide-react";
 
 const slides = [
   {
@@ -52,7 +52,9 @@ function usePrefersReducedMotion() {
 
 export function HeroBanner() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDocumentHidden, setIsDocumentHidden] = useState(false);
+
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const goToPreviousSlide = useCallback(() => {
@@ -60,21 +62,27 @@ export function HeroBanner() {
   }, []);
 
   const goToNextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+     setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, []);
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion || isPaused) return;
+    if (prefersReducedMotion || isHovered || isDocumentHidden) return;
 
     const timer = setInterval(goToNextSlide, 6000);
     return () => clearInterval(timer);
-  }, [goToNextSlide, isPaused, prefersReducedMotion]);
+    
+  }, [goToNextSlide, isDocumentHidden, isHovered, prefersReducedMotion]);
 
   useEffect(() => {
-    const handleVisibility = () => setIsPaused(document.hidden);
-    document.addEventListener("visibilitychange", handleVisibility);
+    const handleVisibilityChange = () => setIsDocumentHidden(document.hidden);
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
-      document.removeEventListener("visibilitychange", handleVisibility);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   const slideTransitionClass = prefersReducedMotion
@@ -82,21 +90,17 @@ export function HeroBanner() {
     : "absolute inset-0 flex transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
 
   const imageTransitionClass = prefersReducedMotion
-    ? "absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity dark:mix-blend-normal"
-    : "absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity dark:mix-blend-normal transition-transform duration-[7000ms] ease-out";
+    ? "absolute inset-0 h-full w-full object-cover"
+    : "absolute inset-0 h-full w-full object-cover transition-transform duration-[7000ms] ease-out";
 
   return (
     <section
-      className="relative w-full h-[480px] sm:h-[560px] lg:h-[620px] overflow-hidden border-b border-border bg-background"
+      className="relative md:-mt-20 h-[480px] w-full overflow-hidden border-b border-border bg-background sm:h-[560px] lg:h-[620px]"
       aria-label="Featured products banner"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-primary/10 blur-[90px] sm:left-1/4 sm:h-80 sm:w-80 sm:translate-x-0" />
-        <div className="absolute bottom-1/3 right-1/2 h-64 w-64 translate-x-1/2 rounded-full bg-muted/70 blur-[100px] sm:right-1/4 sm:h-[28rem] sm:w-[28rem] sm:translate-x-0" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-background via-background/90 to-transparent" />
-
         <div
           className={slideTransitionClass}
           style={{
@@ -131,6 +135,7 @@ export function HeroBanner() {
             </div>
           ))}
         </div>
+        <div className="absolute inset-0 z-10 bg-background/65 dark:bg-background/60" />
       </div>
 
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-30">
@@ -151,8 +156,12 @@ export function HeroBanner() {
       </div>
 
       <div className="relative z-20 mx-auto flex h-full max-w-7xl flex-col justify-center gap-5 px-4 py-16 text-center sm:items-start sm:px-6 sm:text-left lg:px-8 lg:py-24">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
-          <Zap className={`h-4 w-4 fill-current ${prefersReducedMotion ? "" : "animate-pulse"}`} />
+        <div className="inline-flex items-center justify-center gap-2 text-sm font-medium text-foreground sm:justify-start">
+          <Zap
+            className="size-4 text-primary"
+            aria-hidden="true"
+          />
+
           <span key={`badge-${currentSlide}`}>
             {slides[currentSlide].badge}
           </span>
@@ -170,8 +179,12 @@ export function HeroBanner() {
         </h1>
 
         <p
-          key={`desc-${currentSlide}`}
-          className={`mt-1 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg ${prefersReducedMotion ? "" : "animate-in fade-in slide-in-from-bottom-6 duration-700"}`}
+          key={`description-${currentSlide}`}
+          className={`mt-1 max-w-xl text-base leading-7 text-foreground/80 md:text-lg ${
+            prefersReducedMotion
+              ? ""
+              : "animate-in fade-in slide-in-from-bottom-4 duration-700"
+          }`}
         >
           {slides[currentSlide].description}
         </p>
@@ -182,25 +195,25 @@ export function HeroBanner() {
             className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.99]"
           >
             Shop Collection
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 size-4" aria-hidden="true" />
           </a>
         </div>
 
-        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2 sm:left-6 sm:translate-x-0 lg:left-8">
-          {slides.map((_, index) => {
+        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2 sm:left-6 sm:translate-x-0 lg:left-8">
+          {slides.map((slide, index) => {
             const isActive = currentSlide === index;
 
             return (
               <button
-                key={index}
+                key={slide.id}
                 type="button"
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => goToSlide(index)}
                 aria-label={`Go to slide ${index + 1}`}
-                aria-current={isActive}
-                className={`h-1.5 rounded-full transition-all duration-500 ease-in-out ${
+                aria-current={isActive ? "true" : undefined}
+                className={`h-1 transition-[width,background-color] rounded-lg duration-500 ease-out ${
                   isActive
                     ? "w-8 bg-primary"
-                    : "w-4 bg-border hover:bg-muted-foreground"
+                    : "w-4 bg-foreground/30 hover:bg-foreground/60"
                 }`}
               />
             );

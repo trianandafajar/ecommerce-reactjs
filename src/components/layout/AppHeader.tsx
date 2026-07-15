@@ -39,12 +39,12 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-      <header className="sticky top-0 flex w-full border-b border-border bg-background/90 backdrop-blur-md z-99999">
+      <header className="sticky top-0 z-[99999] flex w-full border-b border-border bg-background/90 backdrop-blur-md">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-border sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
             type="button"
-            className="items-center justify-center w-10 h-10 rounded-lg z-99999 border border-border text-foreground transition-colors hover:bg-accent lg:flex lg:h-11 lg:w-11"
+            className="items-center justify-center w-10 h-10 rounded-lg border border-border text-foreground transition-colors hover:bg-accent lg:flex lg:h-11 lg:w-11"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >
@@ -89,7 +89,7 @@ const AppHeader: React.FC = () => {
           <button
             type="button"
             onClick={toggleApplicationMenu}
-            className="flex items-center justify-center w-10 h-10 rounded-lg z-99999 text-foreground transition-colors hover:bg-accent lg:hidden"
+            className="flex items-center justify-center w-10 h-10 rounded-lg text-foreground transition-colors hover:bg-accent lg:hidden"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path

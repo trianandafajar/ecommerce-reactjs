@@ -258,7 +258,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-background text-foreground h-screen transition-all duration-300 ease-in-out z-50 border-r border-border shadow-lg shadow-black/5 
+      className={`fixed left-0 top-0 z-50 mt-16 flex h-[100dvh] flex-col overflow-y-auto overscroll-contain border-r border-border bg-background px-5 text-foreground shadow-lg shadow-black/5 transition-all duration-300 ease-in-out lg:mt-0 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
